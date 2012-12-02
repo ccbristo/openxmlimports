@@ -1,0 +1,7 @@
+syntax: glob
+
+TestResults
+bin/
+obj/
+*.user
+*.suo
