@@ -14,14 +14,15 @@ namespace ExcelImports
 
         public WorkbookConfiguration<TWorkbook> Create()
         {
-            // TODO [ccb] Need a way to differentiate entity types from non-entity types
+            // TODO [ccb] Do we need a way to differentiate entity types from non-entity types ala NH?
             // Need to differentiate things that will be tables from other properties...
             // Ex:
-            // class X{ int I; IEnumerable<Item> Items { get; set; } }
-            // Should only pay attention to items?
+            // class X{ string S; ICollection<Item> Items { get; set; } }
+            // Should only pay attention to Items.
+
             var workbookMembers = typeof(TWorkbook).GetMembers(BindingFlags.Public | BindingFlags.Instance)
-                .Where(m => m.MemberType == MemberTypes.Field || m.MemberType == MemberTypes.Property)
-                .Where(m => m.ClosesInterface(typeof(IEnumerable<>)));
+                .Where(m => m.IsPropertyOrField() &&
+                            m.GetPropertyOrFieldType().ClosesInterface(typeof(ICollection<>)));
 
             foreach (var member in workbookMembers)
             {
@@ -64,7 +65,7 @@ namespace ExcelImports
         }
 
         public WorkbookBuilder<TWorkbook> Worksheet<TWorksheet>(
-            Expression<Func<TWorkbook, IEnumerable<TWorksheet>>> member,
+            Expression<Func<TWorkbook, ICollection<TWorksheet>>> member,
             Action<WorksheetBuilder<TWorksheet>> action)
         {
             var worksheet = GetTypedWorksheet(member);
@@ -74,12 +75,12 @@ namespace ExcelImports
         }
 
         public WorksheetBuilder<TWorksheet>
-            GetWorksheet<TWorksheet>(Expression<Func<TWorkbook, IEnumerable<TWorksheet>>> memberExp)
+            GetWorksheet<TWorksheet>(Expression<Func<TWorkbook, ICollection<TWorksheet>>> memberExp)
         {
             return GetTypedWorksheet(memberExp);
         }
 
-        private WorksheetBuilder<TWorksheet> GetTypedWorksheet<TWorksheet>(Expression<Func<TWorkbook, IEnumerable<TWorksheet>>> memberExp)
+        private WorksheetBuilder<TWorksheet> GetTypedWorksheet<TWorksheet>(Expression<Func<TWorkbook, ICollection<TWorksheet>>> memberExp)
         {
             var memberInfo = memberExp.GetMemberInfo();
 
@@ -98,9 +99,11 @@ namespace ExcelImports
 
         private WorksheetBuilder GetTypedWorksheet(MemberInfo memberInfo)
         {
-            var exp = Expression.MakeMemberAccess(Expression.Parameter(memberInfo.DeclaringType, "x"), memberInfo);
-            var funcType = Expression.GetFuncType(memberInfo.DeclaringType, memberInfo.GetPropertyOrFieldType());
-            var lambda = Expression.Lambda(funcType, exp); // TODO [ccb] Figure out why an exception is being thrown here.
+            var closedCollectionType = memberInfo.GetPropertyOrFieldType().GetClosingInterface(typeof(ICollection<>));
+            var param = Expression.Parameter(memberInfo.DeclaringType, "x");
+            var exp = Expression.MakeMemberAccess(param, memberInfo);
+            var funcType = Expression.GetFuncType(memberInfo.DeclaringType, closedCollectionType);
+            var lambda = Expression.Lambda(funcType, exp, param);
 
             var methods = this.GetType().GetMethods(BindingFlags.Instance | BindingFlags.NonPublic)
                 .Where(m => StringComparer.Ordinal.Equals(m.Name, "GetTypedWorksheet") && m.IsGenericMethod)
@@ -109,7 +112,7 @@ namespace ExcelImports
             if (methods.Count == 0)
                 throw new Exception("Could not find generic overload of GetTypedWorksheet");
 
-            return (WorksheetBuilder)methods[0].MakeGenericMethod(memberInfo.GetPropertyOrFieldType()).Invoke(this, new[] { lambda });
+            return (WorksheetBuilder)methods[0].MakeGenericMethod(closedCollectionType.GetGenericArguments()[0]).Invoke(this, new[] { lambda });
         }
     }
 }

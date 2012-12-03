@@ -6,11 +6,29 @@ namespace ExcelImports
 {
     public static class ReflectionUtils
     {
-        public static bool ClosesInterface(this MemberInfo memberInfo, Type openInterface)
+        public static Type GetClosingInterface(this Type type, Type openInterface)
         {
-            var type = memberInfo.GetPropertyOrFieldType();
+            var closers = type.GetInterfaces()
+                .Where(iFace => iFace.IsGenericType && iFace.GetGenericTypeDefinition() == openInterface)
+                .ToList();
+
+            if (closers.Count == 0)
+                throw new ArgumentException(string.Format("{0} does not close {1}.",
+                    type.Name, openInterface.Name));
+
+            return closers[0];
+        }
+
+        public static bool ClosesInterface(this Type type, Type openInterface)
+        {
             bool result = type.GetInterfaces().Any(iFace => iFace.IsGenericType && iFace.GetGenericTypeDefinition() == openInterface);
             return result;
+        }
+
+        public static bool IsPropertyOrField(this MemberInfo memberInfo)
+        {
+            return memberInfo.MemberType == MemberTypes.Field ||
+                memberInfo.MemberType == MemberTypes.Property;
         }
 
         public static Type GetPropertyOrFieldType(this MemberInfo memberInfo)
