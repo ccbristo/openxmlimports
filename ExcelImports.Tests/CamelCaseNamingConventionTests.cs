@@ -13,7 +13,8 @@ namespace ExcelImports.Tests
             public string SimpleField = null;
             public int CAPPrefix { get; set; }
             public object SuffixCAP { get; set; }
-            internal decimal CapsINTRAWord { get; set; }
+            public decimal CapsINTRAWord { get; set; }
+            public int Has150Numbers { get; set; }
         }
 
         [TestMethod]
@@ -44,6 +45,12 @@ namespace ExcelImports.Tests
         public void TestCapsINTRAWord()
         {
             DoTest(x => x.CapsINTRAWord, "Caps INTRA Word");
+        }
+
+        [TestMethod]
+        public void TestNumbers()
+        {
+            DoTest(x => x.Has150Numbers, "Has 150 Numbers");
         }
 
         private void DoTest<T>(Expression<Func<HasMembersForTesting, T>> memberExp, string expectedName)
