@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace ExcelImports
+namespace ExcelImports.Core
 {
     public sealed class WorkbookConfiguration<TWorkbook>
     {

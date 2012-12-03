@@ -1,11 +1,10 @@
 ﻿using System.Reflection;
 using System.Text;
 
-namespace ExcelImports
+namespace ExcelImports.Core
 {
     public class CamelCaseNamingConvention : INamingConvention
     {
-
         public string GetName(MemberInfo member)
         {
             var sb = new StringBuilder(member.Name);

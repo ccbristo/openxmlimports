@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace ExcelImports
+namespace ExcelImports.Core
 {
     public class ColumnConfiguration
     {

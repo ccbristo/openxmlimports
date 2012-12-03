@@ -68,7 +68,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CamelCaseNamingConvention.cs" />
+    <Compile Include="Core\CamelCaseNamingConvention.cs" />
     <Compile Include="ColumnConfiguration.cs" />
     <Compile Include="ExcelConfiguration.cs" />
     <Compile Include="ExcelImporter.cs" />
@@ -77,9 +77,9 @@
     <Compile Include="INamingConvention.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReflectionUtils.cs" />
-    <Compile Include="WorkbookConfiguration.cs" />
+    <Compile Include="Core\WorkbookConfiguration.cs" />
     <Compile Include="WorkbookBuilder.cs" />
-    <Compile Include="WorksheetConfiguration.cs" />
+    <Compile Include="Core\WorksheetConfiguration.cs" />
     <Compile Include="WorksheetBuilder.cs" />
   </ItemGroup>
   <ItemGroup>

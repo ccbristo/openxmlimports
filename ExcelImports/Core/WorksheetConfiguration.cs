@@ -1,5 +1,4 @@
-﻿
-namespace ExcelImports
+﻿namespace ExcelImports.Core
 {
     public class WorksheetConfiguration
     {
