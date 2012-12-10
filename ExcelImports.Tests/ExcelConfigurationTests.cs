@@ -35,12 +35,6 @@ namespace ExcelImports.Tests
 
             var config = ExcelConfiguration.Workbook<SimpleHierarchy>()
                 .Create();
-
-            var item1Sheet = config.GetWorksheet(sh => sh.Item1s);
-            Assert.IsNotNull(item1Sheet);
-
-
-            Assert.AreEqual(item1Sheet.Name, "Item 1s", false);
         }
 
         //[TestMethod]

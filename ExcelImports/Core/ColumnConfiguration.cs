@@ -1,36 +1,60 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+using System.Linq;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace ExcelImports.Core
 {
     public class ColumnConfiguration
     {
-    }
+        internal ColumnConfiguration()
+        { }
 
-    public class ColumnConfiguration<T>
-        : ColumnConfiguration
-    {
-        private bool listValidOptions = false;
-        private IEnumerable options;
-        private IEqualityComparer<T> Comparer = EqualityComparer<T>.Default;
+        public string Name { get; set; }
+        public string MemberName { get; set; }
 
-        public ColumnConfiguration<T> OneOf(IEnumerable<T> options)
+        public CellBinder GetValue(object item)
         {
-            this.options = options;
-            return this;
+            if (item == null)
+                throw new ArgumentNullException("item");
+
+            var value = item.GetType().GetMember(MemberName)
+                .Single().GetPropertyOrFieldValue(item);
+
+            CellValues cellType = InferCellType(value);
+
+            if (value == null)
+                value = string.Empty;
+            else if (value is DateTime)
+                value = ((DateTime)value).ToOADate().ToString();
+
+            return new CellBinder(value.ToString(), cellType);
         }
 
-        public ColumnConfiguration<T> OneOf<T2>(IEnumerable<T2> options, Func<T, T2, bool> comparison)
+        // TODO [ccb] This should be part of a stronger Type binding model
+        private CellValues InferCellType(object value)
         {
-            this.options = options;
-            return this;
-        }
+            if (value is string || value is char)
+                return CellValues.String;
 
-        public ColumnConfiguration<T> ListValidValuesOnError(bool listValidOptions)
-        {
-            this.listValidOptions = listValidOptions;
-            return this;
+            if (value is bool)
+                return CellValues.Boolean;
+
+            if (value is byte ||
+                value is sbyte ||
+                value is short ||
+                value is ushort ||
+                value is int ||
+                value is uint ||
+                value is long ||
+                value is ulong ||
+                value is float ||
+                value is double ||
+                value is decimal ||
+                value is DateTime) // date times are stored as numbers with special styling
+                return CellValues.Number;
+
+            throw new ArgumentOutOfRangeException("value", string.Format("Could not determine cell type for {0}",
+                value.GetType().Name));
         }
     }
 }

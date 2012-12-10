@@ -12,6 +12,7 @@ namespace ExcelImports
         private readonly WorkbookConfiguration<TWorkbook> mConfiguration = new WorkbookConfiguration<TWorkbook>();
         private readonly Dictionary<object, WorksheetBuilder> worksheets = new Dictionary<object, WorksheetBuilder>();
         private Func<TWorkbook, string> namer;
+        public INamingConvention WorksheetNamingConvention { get; set; }
 
         public WorkbookConfiguration<TWorkbook> Create()
         {

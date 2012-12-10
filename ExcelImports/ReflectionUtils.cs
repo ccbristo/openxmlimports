@@ -45,5 +45,20 @@ namespace ExcelImports
             throw new InvalidOperationException(string.Format("{0}.{1} is not a property or field.",
                 memberInfo.DeclaringType.Name, memberInfo.Name));
         }
+
+        public static object GetPropertyOrFieldValue(this MemberInfo memberInfo, object source)
+        {
+            PropertyInfo propertyInfo;
+            FieldInfo fieldInfo;
+
+            if ((propertyInfo = memberInfo as PropertyInfo) != null)
+                return propertyInfo.GetValue(source, null);
+
+            if ((fieldInfo = memberInfo as FieldInfo) != null)
+                return fieldInfo.GetValue(source);
+
+            throw new InvalidOperationException(string.Format("{0}.{1} is not a property or field.",
+                memberInfo.DeclaringType.Name, memberInfo.Name));
+        }
     }
 }

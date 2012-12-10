@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using System.Text;
 
-namespace ExcelImports.Core
+namespace ExcelImports
 {
     public class CamelCaseNamingConvention : INamingConvention
     {

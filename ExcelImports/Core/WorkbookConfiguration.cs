@@ -1,21 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 
 namespace ExcelImports.Core
 {
-    public sealed class WorkbookConfiguration<TWorkbook>
+    public class WorkbookConfiguration : IEnumerable<WorksheetConfiguration>
     {
         public string Name { get; set; }
-        public INamingConvention WorksheetNamingConvention { get; set; }
-
         private readonly List<WorksheetConfiguration> Worksheets = new List<WorksheetConfiguration>();
-
-        public WorkbookConfiguration()
-        {
-            this.WorksheetNamingConvention = new CamelCaseNamingConvention();
-        }
 
         public void AddWorksheet(WorksheetConfiguration worksheet)
         {
@@ -24,13 +17,28 @@ namespace ExcelImports.Core
 
         public WorksheetConfiguration GetWorksheet(string name)
         {
-            return Worksheets.SingleOrDefault(c => StringComparer.OrdinalIgnoreCase.Equals(name, c.Name));
+            return Worksheets.SingleOrDefault(c => StringComparer.OrdinalIgnoreCase.Equals(name, c.SheetName));
         }
 
-        public WorksheetConfiguration<TWorksheet> GetWorksheet<TWorksheet>(Expression<Func<TWorkbook, IEnumerable<TWorksheet>>> memberExp)
+        public void Export(object workbookSource, Stream output)
         {
-            string name = WorksheetNamingConvention.GetName(memberExp.GetMemberInfo());
-            return (WorksheetConfiguration<TWorksheet>)GetWorksheet(name);
+            ExcelExporter exporter = new ExcelExporter();
+            exporter.Export(this, workbookSource, output);
         }
+
+        public IEnumerator<WorksheetConfiguration> GetEnumerator()
+        {
+            return Worksheets.GetEnumerator();
+        }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return Worksheets.GetEnumerator();
+        }
+    }
+
+    public sealed class WorkbookConfiguration<TWorkbook> : WorkbookConfiguration
+    {
+
     }
 }

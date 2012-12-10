@@ -8,17 +8,6 @@ namespace ExcelImports
 {
     public class WorksheetBuilder
     {
-        public WorksheetBuilder()
-            : this(new WorksheetConfiguration())
-        {
-
-        }
-
-        protected WorksheetBuilder(WorksheetConfiguration config)
-        {
-            this.Configuration = config;
-        }
-
         public WorksheetConfiguration Configuration { get; private set; }
 
         public virtual WorksheetBuilder ExportOnly()
@@ -34,7 +23,7 @@ namespace ExcelImports
 
         public WorksheetBuilder Named(string name)
         {
-            this.Configuration.Name = name;
+            this.Configuration.SheetName = name;
             return this;
         }
     }
@@ -43,7 +32,7 @@ namespace ExcelImports
         : WorksheetBuilder
     {
         public WorksheetBuilder()
-            : base(new WorksheetConfiguration<T>())
+            : base()
         { }
 
         readonly Dictionary<MemberInfo, ColumnConfiguration> ColumnConfigurations = new Dictionary<MemberInfo, ColumnConfiguration>();
@@ -54,7 +43,7 @@ namespace ExcelImports
         }
 
         public WorksheetBuilder<T> Column<TColumn>(Expression<Func<T, TColumn>> columnExp,
-            Action<ColumnConfiguration<TColumn>> action)
+            Action<ColumnBuilder<TColumn>> action)
         {
             throw new NotImplementedException();
 
