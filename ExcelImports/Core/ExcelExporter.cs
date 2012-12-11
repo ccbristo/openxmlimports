@@ -76,8 +76,6 @@ namespace ExcelImports.Core
                     // Would need to return something that included the value and the
                     // CellValues enum for excel formatting/"typing".
 
-                    // TODO [ccb] Should the CellBinder include style info (maybe helpful for date/times)?
-
                     CellBinder binder = column.GetValue(item);
 
                     Cell cell = new Cell()
