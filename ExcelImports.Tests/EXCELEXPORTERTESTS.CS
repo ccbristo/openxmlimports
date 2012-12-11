@@ -64,9 +64,14 @@ namespace ExcelImports.Tests
             var item1 = new SingleTableItem() { I = 0, ADate = christmas2012, StringField = "String 0" };
             var item2 = new SingleTableItem() { I = 1, ADate = newYears2012, StringField = "String 2" };
 
+            // item 3 and 4 are here so we can be sure the null/empty values serialize out.
+            // assertions are omitted because of the shared string table.
+            var item3 = new SingleTableItem() { I = 2, ADate = newYears2012, StringField = null };
+            var item4 = new SingleTableItem() { I = 2, ADate = newYears2012, StringField = string.Empty };
+
             var dataSource = new SingleTableHierarchy()
             {
-                SingleTableItems = new List<SingleTableItem>() { item1, item2 }
+                SingleTableItems = new List<SingleTableItem>() { item1, item2, item3, item4 }
             };
 
             var singleTableItemSheet = new WorksheetConfiguration("Single Table", "SingleTableItems");
@@ -92,7 +97,7 @@ namespace ExcelImports.Tests
                 Assert.IsNotNull(sheetData);
 
                 var rows = sheetData.Elements<Row>().ToList();
-                Assert.AreEqual(3, rows.Count);
+                Assert.AreEqual(5, rows.Count);
 
                 var firstDataRow = rows[1];
                 var A2 = firstDataRow.Elements<Cell>().ToList()[0];
@@ -116,12 +121,15 @@ namespace ExcelImports.Tests
             }
         }
 
-        private static void OpenInExcel(MemoryStream ms)
+        private static void SaveToFile(MemoryStream ms, string name)
         {
             using (var fs = File.OpenWrite("output.xlsx"))
                 ms.WriteTo(fs);
+        }
 
-            System.Diagnostics.Process.Start("output.xlsx");
+        private static void OpenInExcel(string excelFile)
+        {
+            System.Diagnostics.Process.Start(excelFile);
         }
     }
 }

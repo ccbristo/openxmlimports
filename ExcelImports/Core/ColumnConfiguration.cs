@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Reflection;
 using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace ExcelImports.Core
@@ -18,10 +19,10 @@ namespace ExcelImports.Core
             if (item == null)
                 throw new ArgumentNullException("item");
 
-            var value = item.GetType().GetMember(MemberName)
-                .Single().GetPropertyOrFieldValue(item);
+            var memberInfo = item.GetType().GetMember(MemberName).Single();
+            var value = memberInfo.GetPropertyOrFieldValue(item);
 
-            CellValues cellType = InferCellType(value);
+            CellValues cellType = InferCellType(memberInfo);
 
             if (value == null)
                 value = string.Empty;
@@ -32,30 +33,26 @@ namespace ExcelImports.Core
         }
 
         // TODO [ccb] This should be part of a stronger Type binding model
-        private CellValues InferCellType(object value)
+        private CellValues InferCellType(MemberInfo member)
         {
-            if (value is string || value is char)
+            var memberType = member.GetPropertyOrFieldType();
+
+            if (memberType.In(typeof(string), typeof(char)))
                 return CellValues.String;
 
-            if (value is bool)
+            if (memberType == typeof(bool))
                 return CellValues.Boolean;
 
-            if (value is byte ||
-                value is sbyte ||
-                value is short ||
-                value is ushort ||
-                value is int ||
-                value is uint ||
-                value is long ||
-                value is ulong ||
-                value is float ||
-                value is double ||
-                value is decimal ||
-                value is DateTime) // date times are stored as numbers with special styling
+            if (memberType.In(typeof(byte), typeof(sbyte),
+                typeof(short), typeof(ushort),
+                typeof(int), typeof(uint),
+                typeof(long), typeof(ulong),
+                typeof(float), typeof(double), typeof(decimal),
+                typeof(DateTime))) // date times are stored as numbers with special styling
                 return CellValues.Number;
 
             throw new ArgumentOutOfRangeException("value", string.Format("Could not determine cell type for {0}",
-                value.GetType().Name));
+                member.GetType().Name));
         }
     }
 }

@@ -33,7 +33,6 @@ namespace ExcelImports.Core
             {
                 Name = columnName,
                 MemberName = memberName
-                //column.ColumnType = InferType(member.Type) // TODO [ccb] How should mapping to column types be handled?
             };
 
             mColumns.Add(column);
