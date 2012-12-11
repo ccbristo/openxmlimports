@@ -11,6 +11,7 @@ namespace ExcelImports.Core
 
         public string Name { get; set; }
         public string MemberName { get; set; }
+        public NumberingFormat CellFormat { get; set; }
 
         public CellBinder GetValue(object item)
         {

@@ -8,7 +8,13 @@ namespace ExcelImports.Core
     public class WorkbookConfiguration : IEnumerable<WorksheetConfiguration>
     {
         public string Name { get; set; }
+        public IStylesheetProvider StylesheetProvider { get; set; }
         private readonly List<WorksheetConfiguration> Worksheets = new List<WorksheetConfiguration>();
+
+        public WorkbookConfiguration()
+        {
+            StylesheetProvider = new DefaultStylesheetProvider();
+        }
 
         public void AddWorksheet(WorksheetConfiguration worksheet)
         {

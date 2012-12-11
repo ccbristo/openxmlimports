@@ -14,6 +14,9 @@ namespace ExcelImports.Core
             var workbookPart = document.AddWorkbookPart();
             workbookPart.Workbook = new Workbook();
 
+            var stylesPart = workbookPart.AddNewPart<WorkbookStylesPart>();
+            stylesPart.Stylesheet = workbookConfig.StylesheetProvider.Stylesheet;
+
             var sheets = document.WorkbookPart.Workbook.AppendChild<Sheets>(new Sheets());
 
             uint sheetId = 1;
@@ -27,7 +30,7 @@ namespace ExcelImports.Core
                 sheetData.Append(headerRow);
 
                 ICollection boundMember = worksheetConfig.GetMember(workbookSource);
-                ExportData(boundMember, worksheetConfig, sheetData);
+                ExportData(boundMember, worksheetConfig, sheetData, workbookConfig.StylesheetProvider);
 
                 sheets.Append(sheet);
                 sheetId++;
@@ -58,7 +61,8 @@ namespace ExcelImports.Core
             return row;
         }
 
-        private void ExportData(ICollection collection, WorksheetConfiguration worksheetConfig, SheetData sheetData)
+        private void ExportData(ICollection collection, WorksheetConfiguration worksheetConfig, SheetData sheetData,
+            IStylesheetProvider stylesheet)
         {
             foreach (object item in collection)
             {
@@ -72,13 +76,16 @@ namespace ExcelImports.Core
                     // Would need to return something that included the value and the
                     // CellValues enum for excel formatting/"typing".
 
+                    // TODO [ccb] Should the CellBinder include style info (maybe helpful for date/times)?
+
                     CellBinder binder = column.GetValue(item);
 
                     Cell cell = new Cell()
                     {
                         CellReference = colRef,
                         CellValue = new CellValue(binder.Value),
-                        DataType = new EnumValue<CellValues>(binder.CellType)
+                        DataType = new EnumValue<CellValues>(binder.CellType),
+                        StyleIndex = stylesheet.GetStyleIndex(column.CellFormat)
                     };
 
                     row.Append(cell);

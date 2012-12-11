@@ -72,7 +72,8 @@ namespace ExcelImports.Tests
             var singleTableItemSheet = new WorksheetConfiguration("Single Table", "SingleTableItems");
             singleTableItemSheet.SheetName = "Item 1s";
             singleTableItemSheet.AddColumn("I", "I");
-            singleTableItemSheet.AddColumn("A Date", "ADate");
+            var dateColumn = singleTableItemSheet.AddColumn("A Date", "ADate");
+            dateColumn.CellFormat = config.StylesheetProvider.DateFormat;
             singleTableItemSheet.AddColumn("String Field", "StringField");
             config.AddWorksheet(singleTableItemSheet);
 
@@ -113,6 +114,14 @@ namespace ExcelImports.Tests
                 var C3 = secondDataRow.Elements<Cell>().ToList()[2];
                 Assert.AreEqual("String 2", C3.CellValue.Text, "C3");
             }
+        }
+
+        private static void OpenInExcel(MemoryStream ms)
+        {
+            using (var fs = File.OpenWrite("output.xlsx"))
+                ms.WriteTo(fs);
+
+            System.Diagnostics.Process.Start("output.xlsx");
         }
     }
 }
