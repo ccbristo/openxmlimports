@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq.Expressions;
-using ExcelImports.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ExcelImports.Tests

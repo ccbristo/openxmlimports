@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace ExcelImports
 {
-    public static class ReflectionUtils
+    internal static class ReflectionUtils
     {
         public static Type GetClosingInterface(this Type type, Type openInterface)
         {
