@@ -45,7 +45,7 @@ namespace ExcelImports.Core
             var row = new Row();
 
             ColumnReference colRef = "A";
-            foreach (var column in worksheetConfig.Columns)
+            foreach (var column in worksheetConfig)
             {
                 Cell cell = new Cell()
                 {
@@ -69,7 +69,7 @@ namespace ExcelImports.Core
                 Row row = new Row();
                 ColumnReference colRef = "A";
 
-                foreach (var column in worksheetConfig.Columns)
+                foreach (var column in worksheetConfig)
                 {
                     // TODO [ccb] Stronger type binding would be good here.
                     // Ex: column.Type.GetValue -> Type would be an NH style IType

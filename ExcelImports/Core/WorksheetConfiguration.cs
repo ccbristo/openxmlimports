@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 namespace ExcelImports.Core
 {
-    public class WorksheetConfiguration
+    public class WorksheetConfiguration : IEnumerable<ColumnConfiguration>
     {
         private readonly List<ColumnConfiguration> mColumns = new List<ColumnConfiguration>();
 
@@ -63,6 +63,16 @@ namespace ExcelImports.Core
                 throw new InvalidOperationException("Worksheet source is not an ICollection");
 
             return (ICollection)value;
+        }
+
+        public IEnumerator<ColumnConfiguration> GetEnumerator()
+        {
+            return mColumns.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
         }
     }
 }
