@@ -8,11 +8,13 @@ namespace ExcelImports.Core
     public class WorkbookConfiguration : IEnumerable<WorksheetConfiguration>
     {
         public string Name { get; set; }
+        public Type BoundType { get; private set; }
         public IStylesheetProvider StylesheetProvider { get; set; }
         private readonly List<WorksheetConfiguration> Worksheets = new List<WorksheetConfiguration>();
 
-        public WorkbookConfiguration()
+        public WorkbookConfiguration(Type boundType)
         {
+            BoundType = boundType;
             StylesheetProvider = new DefaultStylesheetProvider();
         }
 
@@ -32,6 +34,12 @@ namespace ExcelImports.Core
             exporter.Export(this, workbookSource, output);
         }
 
+        public object Import(Stream input)
+        {
+            ExcelImporter importer = new ExcelImporter();
+            return importer.Import(this, input);
+        }
+
         public IEnumerator<WorksheetConfiguration> GetEnumerator()
         {
             return Worksheets.GetEnumerator();
@@ -41,10 +49,5 @@ namespace ExcelImports.Core
         {
             return Worksheets.GetEnumerator();
         }
-    }
-
-    public sealed class WorkbookConfiguration<TWorkbook> : WorkbookConfiguration
-    {
-
     }
 }

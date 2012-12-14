@@ -60,5 +60,19 @@ namespace ExcelImports
             throw new InvalidOperationException(string.Format("{0}.{1} is not a property or field.",
                 memberInfo.DeclaringType.Name, memberInfo.Name));
         }
+
+        public static void SetPropertyOrFieldValue(this MemberInfo member, object instance, object value)
+        {
+            FieldInfo fieldInfo;
+            PropertyInfo propertyInfo;
+
+            if ((fieldInfo = member as FieldInfo) != null)
+                fieldInfo.SetValue(instance, value);
+            else if ((propertyInfo = member as PropertyInfo) != null)
+                propertyInfo.SetValue(instance, value, null);
+            else
+                throw new InvalidOperationException(string.Format("{0}.{1} is not a property or field.",
+                    member.DeclaringType.Name, member.Name));
+        }
     }
 }

@@ -15,7 +15,7 @@ namespace ExcelImports.Tests
         [TestMethod]
         public void Can_Export_Worksheets()
         {
-            var config = new WorkbookConfiguration();
+            var config = new WorkbookConfiguration(typeof(SimpleHierarchy));
             var dataSource = new SimpleHierarchy()
             {
                 I = 1,
@@ -24,12 +24,10 @@ namespace ExcelImports.Tests
                 Item2s = new List<Item2>()
             };
 
-            var item1Sheet = new WorksheetConfiguration("Item 1s", "Item1s");
-            item1Sheet.SheetName = "Item 1s";
+            var item1Sheet = new WorksheetConfiguration(typeof(Item1), "Item 1s", "Item1s");
             config.AddWorksheet(item1Sheet);
 
-            var item2Sheet = new WorksheetConfiguration("Item 2s", "Item2s");
-            item2Sheet.SheetName = "Item 2s";
+            var item2Sheet = new WorksheetConfiguration(typeof(Item2), "Item 2s", "Item2s");
             config.AddWorksheet(item2Sheet);
 
             using (var output = new MemoryStream())
@@ -56,7 +54,7 @@ namespace ExcelImports.Tests
         [TestMethod]
         public void Can_Export_Columns()
         {
-            var config = new WorkbookConfiguration();
+            var config = new WorkbookConfiguration(typeof(SimpleHierarchy));
 
             DateTime christmas2012 = new DateTime(2012, 12, 25, 11, 59, 30);
             DateTime newYears2012 = new DateTime(2013, 1, 1);
@@ -74,7 +72,7 @@ namespace ExcelImports.Tests
                 SingleTableItems = new List<SingleTableItem>() { item1, item2, item3, item4 }
             };
 
-            var singleTableItemSheet = new WorksheetConfiguration("Single Table", "SingleTableItems");
+            var singleTableItemSheet = new WorksheetConfiguration(typeof(SingleTableItem), "Single Table", "SingleTableItems");
             singleTableItemSheet.SheetName = "Item 1s";
             singleTableItemSheet.AddColumn("I", "I");
             var dateColumn = singleTableItemSheet.AddColumn("A Date", "ADate");

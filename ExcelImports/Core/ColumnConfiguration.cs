@@ -14,6 +14,13 @@ namespace ExcelImports.Core
         public string MemberName { get; set; }
         public NumberingFormat CellFormat { get; set; }
 
+        internal void SetValue(object item, string text)
+        {
+            var memberInfo = item.GetType().GetMember(MemberName).Single();
+            object value = Conversion.ExcelConvert(text, memberInfo.GetPropertyOrFieldType());
+            memberInfo.SetPropertyOrFieldValue(item, value);
+        }
+
         public CellBinder GetValue(object item)
         {
             if (item == null)
@@ -54,5 +61,7 @@ namespace ExcelImports.Core
             throw new ArgumentOutOfRangeException("value", string.Format("Could not determine cell type for {0}",
                 member.GetType().Name));
         }
+
+
     }
 }

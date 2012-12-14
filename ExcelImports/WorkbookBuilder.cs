@@ -9,22 +9,22 @@ namespace ExcelImports
 {
     public class WorkbookBuilder<TWorkbook>
     {
-        private readonly WorkbookConfiguration<TWorkbook> mConfiguration = new WorkbookConfiguration<TWorkbook>();
+        private readonly WorkbookConfiguration mConfiguration = new WorkbookConfiguration(typeof(TWorkbook));
         private readonly Dictionary<object, WorksheetBuilder> worksheets = new Dictionary<object, WorksheetBuilder>();
         private Func<TWorkbook, string> namer;
         public INamingConvention WorksheetNamingConvention { get; set; }
 
-        public WorkbookConfiguration<TWorkbook> Create()
+        public WorkbookConfiguration Create()
         {
             // TODO [ccb] Do we need a way to differentiate entity types from non-entity types ala NH?
             // Need to differentiate things that will be tables from other properties...
             // Ex:
-            // class X{ string S; ICollection<Item> Items { get; set; } }
+            // class X{ string S; IList<Item> Items { get; set; } }
             // Should only pay attention to Items.
 
             var workbookMembers = typeof(TWorkbook).GetMembers(BindingFlags.Public | BindingFlags.Instance)
                 .Where(m => m.IsPropertyOrField() &&
-                            m.GetPropertyOrFieldType().ClosesInterface(typeof(ICollection<>)));
+                            m.GetPropertyOrFieldType().ClosesInterface(typeof(IList<>)));
 
             foreach (var member in workbookMembers)
             {
@@ -67,7 +67,7 @@ namespace ExcelImports
         }
 
         public WorkbookBuilder<TWorkbook> Worksheet<TWorksheet>(
-            Expression<Func<TWorkbook, ICollection<TWorksheet>>> member,
+            Expression<Func<TWorkbook, IList<TWorksheet>>> member,
             Action<WorksheetBuilder<TWorksheet>> action)
         {
             var worksheet = GetTypedWorksheet(member);
@@ -77,12 +77,12 @@ namespace ExcelImports
         }
 
         public WorksheetBuilder<TWorksheet>
-            GetWorksheet<TWorksheet>(Expression<Func<TWorkbook, ICollection<TWorksheet>>> memberExp)
+            GetWorksheet<TWorksheet>(Expression<Func<TWorkbook, IList<TWorksheet>>> memberExp)
         {
             return GetTypedWorksheet(memberExp);
         }
 
-        private WorksheetBuilder<TWorksheet> GetTypedWorksheet<TWorksheet>(Expression<Func<TWorkbook, ICollection<TWorksheet>>> memberExp)
+        private WorksheetBuilder<TWorksheet> GetTypedWorksheet<TWorksheet>(Expression<Func<TWorkbook, IList<TWorksheet>>> memberExp)
         {
             var memberInfo = memberExp.GetMemberInfo();
 
@@ -101,7 +101,7 @@ namespace ExcelImports
 
         private WorksheetBuilder GetTypedWorksheet(MemberInfo memberInfo)
         {
-            var closedCollectionType = memberInfo.GetPropertyOrFieldType().GetClosingInterface(typeof(ICollection<>));
+            var closedCollectionType = memberInfo.GetPropertyOrFieldType().GetClosingInterface(typeof(IList<>));
             var param = Expression.Parameter(memberInfo.DeclaringType, "x");
             var exp = Expression.MakeMemberAccess(param, memberInfo);
             var funcType = Expression.GetFuncType(memberInfo.DeclaringType, closedCollectionType);

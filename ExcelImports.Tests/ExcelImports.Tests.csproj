@@ -71,6 +71,7 @@
     <Compile Include="ColumnReferenceTests.cs" />
     <Compile Include="ExcelConfigurationTests.cs" />
     <Compile Include="ExcelExporterTests.cs" />
+    <Compile Include="ExcelImporterTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyRateSet.cs" />
     <Compile Include="SimpleHierarchy.cs" />
@@ -104,6 +105,9 @@
       <Project>{746B9553-31A4-4D1B-8842-7A1FF9E4070F}</Project>
       <Name>ExcelImports</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestFiles\Basic_Import.xlsx" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

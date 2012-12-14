@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+using DocumentFormat.OpenXml.Spreadsheet;
+
 namespace ExcelImports.Core
 {
     public class WorksheetConfiguration : IEnumerable<ColumnConfiguration>
@@ -13,19 +16,21 @@ namespace ExcelImports.Core
             get { return mColumns.AsReadOnly(); }
         }
 
-        internal WorksheetConfiguration()
-            : this(null, null)
+        internal WorksheetConfiguration(Type boundType)
+            : this(boundType, null, null)
         { }
 
-        public WorksheetConfiguration(string sheetName, string memberName)
+        public WorksheetConfiguration(Type boundType, string sheetName, string memberName)
         {
             this.SheetName = sheetName;
             this.MemberName = memberName;
+            this.BoundType = boundType;
         }
 
-        public bool ExportOnly { get; set; }
-        public string SheetName { get; set; }
+        public Type BoundType { get; set; }
         public string MemberName { get; set; }
+        public string SheetName { get; set; }
+        public bool ExportOnly { get; set; }
 
         public ColumnConfiguration AddColumn(string columnName, string memberName)
         {
@@ -40,7 +45,22 @@ namespace ExcelImports.Core
             return column;
         }
 
-        internal ICollection GetMember(object workbookSource)
+        internal Sheet GetWorksheet(Sheets sheets)
+        {
+            var matchingSheets = sheets.Elements<Sheet>()
+                .Where(sheet => string.Equals(this.SheetName, sheet.Name))
+                .ToList();
+
+            if (matchingSheets.Count != 1)
+                // TODO [ccb] This should throw an exception with a type that can be caught
+                // since this may be a user correctable error.
+                throw new InvalidOperationException(string.Format(
+                    "No sheet named {0} was found in the workbook.", this.SheetName));
+
+            return matchingSheets[0];
+        }
+
+        internal MemberInfo GetMemberInfo(object workbookSource)
         {
             if (workbookSource == null)
                 throw new ArgumentNullException("workbookSource");
@@ -55,14 +75,19 @@ namespace ExcelImports.Core
                 // TODO [ccb] Verify this is the type of exception to throw and add a meaningful message.
                 throw new AmbiguousMatchException();
 
-            var memberInfo = memberInfos[0];
+            return memberInfos[0];
+        }
+
+        internal IList GetMember(object workbookSource)
+        {
+            var memberInfo = GetMemberInfo(workbookSource);
             object value = memberInfo.GetPropertyOrFieldValue(workbookSource);
 
-            if (!(value is ICollection))
+            if (!(value is IList))
                 // TODO [ccb] Improve this message
-                throw new InvalidOperationException("Worksheet source is not an ICollection");
+                throw new InvalidOperationException("Worksheet source is not an IList");
 
-            return (ICollection)value;
+            return (IList)value;
         }
 
         public IEnumerator<ColumnConfiguration> GetEnumerator()

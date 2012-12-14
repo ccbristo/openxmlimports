@@ -9,9 +9,9 @@ namespace ExcelImports.Tests
         [TestMethod]
         public void Can_Get_Added_Worksheets()
         {
-            var config = new WorkbookConfiguration();
+            var config = new WorkbookConfiguration(typeof(object));
 
-            var expected = new WorksheetConfiguration("Sheet 1", "Sheet1");
+            var expected = new WorksheetConfiguration(typeof(object), "Sheet 1", "Sheet1");
 
             config.AddWorksheet(expected);
 

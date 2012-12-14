@@ -29,7 +29,7 @@ namespace ExcelImports.Core
                 var headerRow = CreateHeaderRow(worksheetConfig, sheetData);
                 sheetData.Append(headerRow);
 
-                ICollection boundMember = worksheetConfig.GetMember(workbookSource);
+                IList boundMember = worksheetConfig.GetMember(workbookSource);
                 ExportData(boundMember, worksheetConfig, sheetData, workbookConfig.StylesheetProvider);
 
                 sheets.Append(sheet);
@@ -61,10 +61,10 @@ namespace ExcelImports.Core
             return row;
         }
 
-        private void ExportData(ICollection collection, WorksheetConfiguration worksheetConfig, SheetData sheetData,
+        private void ExportData(IList list, WorksheetConfiguration worksheetConfig, SheetData sheetData,
             IStylesheetProvider stylesheet)
         {
-            foreach (object item in collection)
+            foreach (object item in list)
             {
                 Row row = new Row();
                 ColumnReference colRef = "A";
