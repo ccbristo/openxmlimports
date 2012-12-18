@@ -61,7 +61,7 @@ namespace ExcelImports.Core
                 typeof(DateTime))) // date times are stored as numbers with special styling
                 return CellValues.Number;
 
-            throw new ArgumentOutOfRangeException("value", string.Format("Could not determine cell type for {0}",
+            throw new ArgumentOutOfRangeException("member", string.Format("Could not determine cell type for {0}",
                 member.GetType().Name));
         }
 

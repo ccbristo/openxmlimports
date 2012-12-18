@@ -51,11 +51,9 @@ namespace ExcelImports.Core
                 .Where(sheet => string.Equals(this.SheetName, sheet.Name))
                 .ToList();
 
-            if (matchingSheets.Count != 1)
-                // TODO [ccb] This should throw an exception with a type that can be caught
-                // since this may be a user correctable error.
-                throw new InvalidOperationException(string.Format(
-                    "No sheet named {0} was found in the workbook.", this.SheetName));
+            if (matchingSheets.Count != 1) // use error policy
+                throw new MissingWorksheetException("No sheet named \"{0}\" was found in the workbook.",
+                    this.SheetName);
 
             return matchingSheets[0];
         }

@@ -20,7 +20,7 @@ namespace ExcelImports.Core
             var document = CreateDocument(input);
 
 
-            var sheets = document.WorkbookPart.Workbook.Sheets; // .First().GetAttribute("name", null).Value
+            var sheets = document.WorkbookPart.Workbook.Sheets;
 
             foreach (var worksheetConfig in workbookConfiguration)
             {
@@ -58,12 +58,11 @@ namespace ExcelImports.Core
                 var cells = headerRow.Elements<Cell>().Where(c => c.GetCellText(sharedStrings) == column.Name)
                     .ToList();
 
-                if (cells.Count != 1)
-                    // TODO [ccb] This should throw a catchable error since this
-                    // situation is probably user correctable.
-                    throw new InvalidOperationException(string.Format(
-                        "Did not find exactly one column named {0}",
-                        column.Name));
+                if (cells.Count == 0) // use error policy
+                    throw new MissingColumnException("No column named \"{0}\" could be found.",
+                        column.Name);
+                else if (cells.Count > 1) // use error policy
+                    throw new DuplicatedColumnException("Found multiple columns named \"{0}\".", column.Name);
 
                 map.Add(column, cells[0].CellReference.Column());
             }
@@ -107,10 +106,8 @@ namespace ExcelImports.Core
             OpenXmlValidator validator = new OpenXmlValidator(FileFormatVersions.Office2007);
             var errorInfo = validator.Validate(document);
 
-            if (errorInfo.Any())
-            {
+            if (errorInfo.Any()) // use error policy
                 throw CreateInvalidDocumentException(errorInfo);
-            }
 
             return document;
         }
