@@ -6,39 +6,34 @@ namespace ExcelImports.Core
     {
         public static object ExcelConvert(string toConvert, Type targetType)
         {
-            Type trueTargetType = null;
             bool isNullable = false;
 
-            if (targetType.IsGenericType && targetType.GetGenericTypeDefinition() == (typeof(Nullable<>)))
+            if (targetType.IsNullable())
             {
-                trueTargetType = Nullable.GetUnderlyingType(targetType);
+                targetType = Nullable.GetUnderlyingType(targetType);
                 isNullable = true;
-            }
-            else
-            {
-                trueTargetType = targetType;
             }
 
             // excel uses OA dates, so do a special conversion here.
-            if (trueTargetType == typeof(DateTime))
+            if (targetType == typeof(DateTime))
                 return DateTime.FromOADate(double.Parse(toConvert.ToString()));
 
             // unfortunately, ChangeType does NOT handle enums, so manually handle here
-            if (trueTargetType.IsEnum)
+            if (targetType.IsEnum)
             {
                 if (toConvert is string && string.IsNullOrEmpty((string)toConvert) && isNullable)
                 {
                     return null;
                 }
 
-                return Enum.Parse(trueTargetType, toConvert.ToString());
+                return Enum.Parse(targetType, toConvert.ToString());
             }
             else if (isNullable && toConvert == null)
             {
                 return null;
             }
 
-            return Convert.ChangeType(toConvert, trueTargetType);
+            return Convert.ChangeType(toConvert, targetType);
         }
     }
 }

@@ -74,5 +74,10 @@ namespace ExcelImports
                 throw new InvalidOperationException(string.Format("{0}.{1} is not a property or field.",
                     member.DeclaringType.Name, member.Name));
         }
+
+        public static bool IsNullable(this Type type)
+        {
+            return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
+        }
     }
 }

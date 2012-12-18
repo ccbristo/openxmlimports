@@ -12,7 +12,7 @@ namespace ExcelImports.Tests
     {
         public string StringField;
         public int I { get; set; }
-        public DateTime ADate { get; set; }
+        public DateTime? ADate { get; set; }
 
     }
 }

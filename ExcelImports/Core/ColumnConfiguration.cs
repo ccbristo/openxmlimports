@@ -44,6 +44,9 @@ namespace ExcelImports.Core
         {
             var memberType = member.GetPropertyOrFieldType();
 
+            if (memberType.IsNullable())
+                memberType = Nullable.GetUnderlyingType(memberType);
+
             if (memberType.In(typeof(string), typeof(char)))
                 return CellValues.String;
 

@@ -29,15 +29,22 @@ namespace ExcelImports.Tests
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.SingleTableItems, "result.SingleTableItems == null");
-            Assert.AreEqual(2, result.SingleTableItems.Count, "SingleTableItems.Count");
+            Assert.AreEqual(3, result.SingleTableItems.Count, "SingleTableItems.Count");
 
             var firstItem = result.SingleTableItems[0];
             Assert.AreEqual(0, firstItem.I, "firstItem.I");
+            Assert.AreEqual(christmas2012, firstItem.ADate, "firstItem.ADate");
             Assert.AreEqual("String 1", firstItem.StringField, "firstItem.StringField");
 
             var secondItem = result.SingleTableItems[1];
             Assert.AreEqual(654, secondItem.I, "secondItem.I");
+            Assert.AreEqual(newYears2012, secondItem.ADate, "firstItem.ADate");
             Assert.IsNull(secondItem.StringField, "secondItem.StringField");
+
+            var thirdItem = result.SingleTableItems[2];
+            Assert.AreEqual(655, thirdItem.I, "thirdItem.I");
+            Assert.IsNull(thirdItem.ADate, "thirdItem.I");
+            Assert.AreEqual("Another string", thirdItem.StringField, "thirdItem.StringField");
         }
     }
 }
