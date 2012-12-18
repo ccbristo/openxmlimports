@@ -9,6 +9,7 @@ namespace ExcelImports.Core
     {
         public string Name { get; set; }
         public Type BoundType { get; private set; }
+        public IErrorPolicy ErrorPolicy { get; set; }
         public IStylesheetProvider StylesheetProvider { get; set; }
         private readonly List<WorksheetConfiguration> Worksheets = new List<WorksheetConfiguration>();
 
@@ -16,6 +17,7 @@ namespace ExcelImports.Core
         {
             BoundType = boundType;
             StylesheetProvider = new DefaultStylesheetProvider();
+            ErrorPolicy = new ImmediateExceptionErrorPolicy();
         }
 
         public void AddWorksheet(WorksheetConfiguration worksheet)

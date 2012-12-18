@@ -78,6 +78,7 @@
     <Compile Include="Core\Conversion.cs" />
     <Compile Include="Core\DuplicatedColumnException.cs" />
     <Compile Include="Core\ExcelExporter.cs" />
+    <Compile Include="Core\ImmediateExceptionErrorPolicy.cs" />
     <Compile Include="Core\IStylesheetProvider.cs" />
     <Compile Include="Core\DefaultStylesheetProvider.cs" />
     <Compile Include="Core\MissingColumnException.cs" />
@@ -87,6 +88,7 @@
     <Compile Include="ExcelConfiguration.cs" />
     <Compile Include="Core\ExcelImporter.cs" />
     <Compile Include="ExpressionUtils.cs" />
+    <Compile Include="IErrorPolicy.cs" />
     <Compile Include="INamingConvention.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReflectionUtils.cs" />

@@ -45,15 +45,14 @@ namespace ExcelImports.Core
             return column;
         }
 
-        internal Sheet GetWorksheet(Sheets sheets)
+        internal Sheet GetWorksheet(Sheets sheets, IErrorPolicy errorPolicy)
         {
             var matchingSheets = sheets.Elements<Sheet>()
                 .Where(sheet => string.Equals(this.SheetName, sheet.Name))
                 .ToList();
 
-            if (matchingSheets.Count != 1) // use error policy
-                throw new MissingWorksheetException("No sheet named \"{0}\" was found in the workbook.",
-                    this.SheetName);
+            if (matchingSheets.Count != 1)
+                errorPolicy.OnMissingWorksheet(this.SheetName);
 
             return matchingSheets[0];
         }

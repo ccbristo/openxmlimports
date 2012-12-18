@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
@@ -17,19 +16,18 @@ namespace ExcelImports.Core
         public object Import(WorkbookConfiguration workbookConfiguration, Stream input)
         {
             object result = Create(workbookConfiguration.BoundType);
-            var document = CreateDocument(input);
-
-
+            var document = CreateDocument(input, workbookConfiguration.ErrorPolicy);
             var sheets = document.WorkbookPart.Workbook.Sheets;
 
+            // TODO [ccb] Add tests for import only sheets
             foreach (var worksheetConfig in workbookConfiguration)
             {
-                var sheet = worksheetConfig.GetWorksheet(sheets);
+                var sheet = worksheetConfig.GetWorksheet(sheets, workbookConfiguration.ErrorPolicy);
                 var worksheetMember = worksheetConfig.GetMemberInfo(result);
                 var list = (IList)Create(worksheetMember.GetPropertyOrFieldType());
                 worksheetMember.SetPropertyOrFieldValue(result, list);
 
-                var worksheetPart = ((WorksheetPart)document.WorkbookPart.GetPartById(sheet.Id));
+                var worksheetPart = (WorksheetPart)document.WorkbookPart.GetPartById(sheet.Id);
 
                 var sharedStringTable = document.WorkbookPart.SharedStringTablePart.SharedStringTable;
 
@@ -37,7 +35,8 @@ namespace ExcelImports.Core
                 var headerRow = sheetData.Elements<Row>().First();
                 var dataRows = sheetData.Elements<Row>().Skip(1).ToList();
 
-                var columnMap = MapColumns(worksheetConfig, headerRow, sharedStringTable);
+                var columnMap = MapColumns(worksheetConfig, workbookConfiguration.ErrorPolicy,
+                    headerRow, sharedStringTable);
                 AddWorksheetItems(dataRows, list, worksheetConfig,
                     columnMap, sharedStringTable);
 
@@ -47,7 +46,7 @@ namespace ExcelImports.Core
         }
 
         private IDictionary<ColumnConfiguration, ColumnReference> MapColumns(WorksheetConfiguration worksheetConfig,
-            Row headerRow, SharedStringTable sharedStrings)
+            IErrorPolicy errorPolicy, Row headerRow, SharedStringTable sharedStrings)
         {
             var map = new Dictionary<ColumnConfiguration, ColumnReference>();
 
@@ -58,11 +57,10 @@ namespace ExcelImports.Core
                 var cells = headerRow.Elements<Cell>().Where(c => c.GetCellText(sharedStrings) == column.Name)
                     .ToList();
 
-                if (cells.Count == 0) // use error policy
-                    throw new MissingColumnException("No column named \"{0}\" could be found.",
-                        column.Name);
-                else if (cells.Count > 1) // use error policy
-                    throw new DuplicatedColumnException("Found multiple columns named \"{0}\".", column.Name);
+                if (cells.Count == 0)
+                    errorPolicy.OnMissingColumn(column.Name);
+                else if (cells.Count > 1)
+                    errorPolicy.OnDuplicatedColumn(column.Name);
 
                 map.Add(column, cells[0].CellReference.Column());
             }
@@ -99,26 +97,17 @@ namespace ExcelImports.Core
             }
         }
 
-        private static SpreadsheetDocument CreateDocument(Stream input)
+        private static SpreadsheetDocument CreateDocument(Stream input, IErrorPolicy errorPolicy)
         {
             var document = SpreadsheetDocument.Open(input, false);
 
             OpenXmlValidator validator = new OpenXmlValidator(FileFormatVersions.Office2007);
             var errorInfo = validator.Validate(document);
 
-            if (errorInfo.Any()) // use error policy
-                throw CreateInvalidDocumentException(errorInfo);
+            if (errorInfo.Any())
+                errorPolicy.OnInvalidFile(errorInfo);
 
             return document;
-        }
-
-        private static Exception CreateInvalidDocumentException(IEnumerable<ValidationErrorInfo> errorInfo)
-        {
-            var message = errorInfo.Aggregate(new StringBuilder(),
-                (sb, error) => sb.AppendLine(error.Description),
-                sb => sb.ToString());
-
-            return new InvalidMCContentException(message);
         }
 
         private static object Create(Type type)
