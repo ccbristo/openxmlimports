@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
 using ExcelImports.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -128,6 +129,33 @@ namespace ExcelImports.Tests
             catch (DuplicatedColumnException)
             {
                 // expected
+            }
+        }
+
+        [TestMethod]
+        public void Importer_Completes_Error_Policy()
+        {
+            var config = new WorkbookConfiguration(typeof(SingleTableHierarchy));
+            config.ErrorPolicy = new AggregatingExceptionErrorPolicy();
+            var singleTableItemSheet = new WorksheetConfiguration(typeof(SingleTableItem), "Single Table", "SingleTableItems");
+            singleTableItemSheet.SheetName = "Item 1s";
+            singleTableItemSheet.AddColumn("I", "I");
+            var dateColumn = singleTableItemSheet.AddColumn("A Date", "ADate");
+            dateColumn.CellFormat = config.StylesheetProvider.DateFormat;
+            singleTableItemSheet.AddColumn("String Field", "StringField");
+            config.AddWorksheet(singleTableItemSheet);
+
+            try
+            {
+                SingleTableHierarchy result;
+                using (var input = Assembly.GetExecutingAssembly().GetManifestResourceStream("ExcelImports.Tests.TestFiles.Multiple_Errors.xlsx"))
+                    result = (SingleTableHierarchy)config.Import(input);
+
+                Assert.Fail("Should have thrown an exception due to errors.");
+            }
+            catch (InvalidImportFileException ex)
+            {
+                Assert.AreEqual(2, ex.Errors.Count());
             }
         }
     }

@@ -9,5 +9,6 @@ namespace ExcelImports
         void OnMissingWorksheet(string sheetName);
         void OnMissingColumn(string columnName);
         void OnDuplicatedColumn(string columnName);
+        void OnImportComplete();
     }
 }

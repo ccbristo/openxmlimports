@@ -33,5 +33,10 @@ namespace ExcelImports.Core
         {
             throw new DuplicatedColumnException("Found multiple columns named \"{0}\".", columnName);
         }
+
+        public void OnImportComplete()
+        {
+            // nop
+        }
     }
 }

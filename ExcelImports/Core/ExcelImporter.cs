@@ -17,6 +17,7 @@ namespace ExcelImports.Core
         {
             object result = Create(workbookConfiguration.BoundType);
             var document = CreateDocument(input, workbookConfiguration.ErrorPolicy);
+
             var sheets = document.WorkbookPart.Workbook.Sheets;
 
             // TODO [ccb] Add tests for import only sheets
@@ -42,6 +43,7 @@ namespace ExcelImports.Core
 
             }
 
+            workbookConfiguration.ErrorPolicy.OnImportComplete();
             return result;
         }
 
@@ -105,7 +107,17 @@ namespace ExcelImports.Core
             var errorInfo = validator.Validate(document);
 
             if (errorInfo.Any())
+            {
                 errorPolicy.OnInvalidFile(errorInfo);
+                errorPolicy.OnImportComplete(); // we can't continue if the file is invalid.
+
+                // TODO [ccb] the below seems fishy, but it also seems that
+                // a correctly written error policy will either throw an exception
+                // immediately upon being notified of an invalidty or
+                // would do so during OnImportComplete, which means this statement
+                // should never be hit, in any case, the below ensures processing ends here in such a case.
+                throw new InvalidImportFileException("The document is invalid.");
+            }
 
             return document;
         }

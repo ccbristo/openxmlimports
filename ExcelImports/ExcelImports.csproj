@@ -72,6 +72,7 @@
   <ItemGroup>
     <Compile Include="CamelCaseNamingConvention.cs" />
     <Compile Include="ColumnBuilder.cs" />
+    <Compile Include="Core\AggregatingExceptionErrorPolicy.cs" />
     <Compile Include="Core\CellBinder.cs" />
     <Compile Include="Core\ColumnConfiguration.cs" />
     <Compile Include="Core\ColumnReference.cs" />
@@ -79,6 +80,7 @@
     <Compile Include="Core\DuplicatedColumnException.cs" />
     <Compile Include="Core\ExcelExporter.cs" />
     <Compile Include="Core\ImmediateExceptionErrorPolicy.cs" />
+    <Compile Include="Core\InvalidImportFileException.cs" />
     <Compile Include="Core\IStylesheetProvider.cs" />
     <Compile Include="Core\DefaultStylesheetProvider.cs" />
     <Compile Include="Core\MissingColumnException.cs" />

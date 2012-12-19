@@ -69,6 +69,7 @@
   <ItemGroup>
     <Compile Include="CamelCaseNamingConventionTests.cs" />
     <Compile Include="ColumnReferenceTests.cs" />
+    <Compile Include="AggregatingExceptionErrorPolicyTests.cs" />
     <Compile Include="ExcelConfigurationTests.cs" />
     <Compile Include="ExcelExporterTests.cs" />
     <Compile Include="ExcelImporterTests.cs" />
@@ -117,6 +118,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="TestFiles\Duplicated_Columns.xlsx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestFiles\Multiple_Errors.xlsx" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
