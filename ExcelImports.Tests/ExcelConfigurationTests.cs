@@ -39,7 +39,7 @@ namespace ExcelImports.Tests
         public void Override_Sheet_Name()
         {
             var config = ExcelConfiguration.Workbook<SimpleHierarchy>()
-                .Worksheet(sh => sh.Item1s, item1Sheet =>
+                .Worksheet(sh => sh.Item1s, (item1Sheet, styles) =>
                     {
                         item1Sheet.Named("The Item1s");
                     })
@@ -55,7 +55,7 @@ namespace ExcelImports.Tests
         public void Override_Column_Name()
         {
             var config = ExcelConfiguration.Workbook<SimpleHierarchy>()
-                .Worksheet(sh => sh.Item1s, item1Sheet =>
+                .Worksheet(sh => sh.Item1s, (item1Sheet, styles) =>
                 {
                     item1Sheet.Column(item => item.Name, nameCol =>
                     {
@@ -98,10 +98,16 @@ namespace ExcelImports.Tests
             };
 
             var config = ExcelConfiguration.Workbook<SimpleHierarchy>()
+                .Worksheet(sh => sh.Item2s,
+                (item2Sheet, styles) =>
+                {
+                    item2Sheet.Column(item2 => item2.ADate,
+                        dateCol => dateCol.Format(styles.DateTimeFormat));
+                })
                 .Create();
 
             var dateColumn = config.GetWorksheet("Item 2s").Single(c => c.Name == "A Date");
-            Assert.AreSame(config.StylesheetProvider.DateFormat, dateColumn.CellFormat);
+            Assert.AreSame(config.StylesheetProvider.DateTimeFormat, dateColumn.CellFormat);
 
             using (var fs = System.IO.File.Open("output.xlsx", System.IO.FileMode.Create, System.IO.FileAccess.ReadWrite))
                 config.Export(workbook, fs);
@@ -116,7 +122,7 @@ namespace ExcelImports.Tests
 
             ExcelConfiguration.Workbook<PropertyRateSet>()
                 .Worksheet("Instructions", instructionsSheet => instructionsSheet.ExportOnly())
-                .Worksheet(prs => prs.StateGroups, stateGroupSheet =>
+                .Worksheet(prs => prs.StateGroups, (stateGroupSheet, styles) =>
                     {
                         stateGroupSheet
                             .Column(sga => sga.State, columnConfig =>

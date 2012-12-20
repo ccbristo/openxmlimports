@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using DocumentFormat.OpenXml.Spreadsheet;
 using ExcelImports.Core;
 
 namespace ExcelImports
@@ -37,6 +38,12 @@ namespace ExcelImports
         public new ColumnBuilder<TColumn> Named(string name)
         {
             base.Named(name);
+            return this;
+        }
+
+        public ColumnBuilder<TColumn> Format(NumberingFormat format)
+        {
+            base.Configuration.CellFormat = format;
             return this;
         }
 

@@ -69,10 +69,10 @@ namespace ExcelImports
 
         public WorkbookBuilder<TWorkbook> Worksheet<TWorksheet>(
             Expression<Func<TWorkbook, IList<TWorksheet>>> member,
-            Action<WorksheetBuilder<TWorksheet>> action)
+            Action<WorksheetBuilder<TWorksheet>, IStylesheetProvider> action)
         {
             var worksheet = GetTypedWorksheet(member);
-            action(worksheet);
+            action(worksheet, mConfiguration.StylesheetProvider);
             worksheets[member.GetMemberInfo()] = worksheet;
             return this;
         }
