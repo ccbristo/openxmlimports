@@ -15,12 +15,19 @@ namespace ExcelImports.Tests
             public object SuffixCAP { get; set; }
             public decimal CapsINTRAWord { get; set; }
             public int Has150Numbers { get; set; }
+            public string ADate { get; set; }
         }
 
         [TestMethod]
         public void TestSimpleField()
         {
             DoTest(x => x.SimpleField, "Simple Field");
+        }
+
+        [TestMethod]
+        public void TestADate()
+        {
+            DoTest(x => x.ADate, "A Date");
         }
 
         [TestMethod]

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using ExcelImports.Core;
@@ -12,6 +14,26 @@ namespace ExcelImports.Tests
     [TestClass]
     public class ExcelExporterTests
     {
+        private static readonly MemberInfo SingleTableHierarchyItem1sMember;
+        private static readonly MemberInfo SingleTableHierarchyIMember;
+        private static readonly MemberInfo SingleTableHierarchyStringFieldMember;
+        private static readonly MemberInfo SingleTableHierarchyADateMember;
+
+        static ExcelExporterTests()
+        {
+            Expression<Func<SingleTableHierarchy, List<SingleTableItem>>> singleTableHierarchyItems = st => st.SingleTableItems;
+            SingleTableHierarchyItem1sMember = singleTableHierarchyItems.GetMemberInfo();
+
+            Expression<Func<SingleTableItem, int>> iProperty = sti => sti.I;
+            SingleTableHierarchyIMember = iProperty.GetMemberInfo();
+
+            Expression<Func<SingleTableItem, string>> stringField = sti => sti.StringField;
+            SingleTableHierarchyStringFieldMember = stringField.GetMemberInfo();
+
+            Expression<Func<SingleTableItem, DateTime?>> aDateProperty = sti => sti.ADate;
+            SingleTableHierarchyADateMember = aDateProperty.GetMemberInfo();
+        }
+
         [TestMethod]
         public void Can_Export_Worksheets()
         {
@@ -24,10 +46,10 @@ namespace ExcelImports.Tests
                 Item2s = new List<Item2>()
             };
 
-            var item1Sheet = new WorksheetConfiguration(typeof(Item1), "Item 1s", "Item1s");
+            var item1Sheet = new WorksheetConfiguration(typeof(Item1), "Item 1s", "Item1s", config.StylesheetProvider);
             config.AddWorksheet(item1Sheet);
 
-            var item2Sheet = new WorksheetConfiguration(typeof(Item2), "Item 2s", "Item2s");
+            var item2Sheet = new WorksheetConfiguration(typeof(Item2), "Item 2s", "Item2s", config.StylesheetProvider);
             config.AddWorksheet(item2Sheet);
 
             using (var output = new MemoryStream())
@@ -72,12 +94,12 @@ namespace ExcelImports.Tests
                 SingleTableItems = new List<SingleTableItem>() { item1, item2, item3, item4 }
             };
 
-            var singleTableItemSheet = new WorksheetConfiguration(typeof(SingleTableItem), "Single Table", "SingleTableItems");
+            var singleTableItemSheet = new WorksheetConfiguration(typeof(SingleTableItem), "Single Table", "SingleTableItems", config.StylesheetProvider);
             singleTableItemSheet.SheetName = "Item 1s";
-            singleTableItemSheet.AddColumn("I", "I");
-            var dateColumn = singleTableItemSheet.AddColumn("A Date", "ADate");
+            singleTableItemSheet.AddColumn("I", SingleTableHierarchyIMember);
+            var dateColumn = singleTableItemSheet.AddColumn("A Date", SingleTableHierarchyADateMember);
             dateColumn.CellFormat = config.StylesheetProvider.DateFormat;
-            singleTableItemSheet.AddColumn("String Field", "StringField");
+            singleTableItemSheet.AddColumn("String Field", SingleTableHierarchyStringFieldMember);
             config.AddWorksheet(singleTableItemSheet);
 
             using (var output = new MemoryStream())

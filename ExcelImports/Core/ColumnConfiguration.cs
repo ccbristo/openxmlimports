@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Reflection;
 using DocumentFormat.OpenXml.Spreadsheet;
 
@@ -8,17 +7,24 @@ namespace ExcelImports.Core
     public class ColumnConfiguration
     {
         internal ColumnConfiguration()
-        { }
+        {
+            //OptionComparer = Comparer.DefaultInvariant;
+        }
 
         public string Name { get; set; }
-        public string MemberName { get; set; }
+        public MemberInfo Member { get; set; }
+
         public NumberingFormat CellFormat { get; set; }
+
+        // TODO [ccb] Implement these features.
+        //public IEnumerable ValidValues { get; set; }
+        //public bool ListValidValuesOnError { get; set; }
+        //public IComparer OptionComparer { get; set; }
 
         internal void SetValue(object item, string text)
         {
-            var memberInfo = item.GetType().GetMember(MemberName).Single();
-            object value = Conversion.ExcelConvert(text, memberInfo.GetPropertyOrFieldType());
-            memberInfo.SetPropertyOrFieldValue(item, value);
+            object value = Conversion.ExcelConvert(text, Member.GetPropertyOrFieldType());
+            Member.SetPropertyOrFieldValue(item, value);
         }
 
         public CellBinder GetValue(object item)
@@ -26,10 +32,9 @@ namespace ExcelImports.Core
             if (item == null)
                 throw new ArgumentNullException("item");
 
-            var memberInfo = item.GetType().GetMember(MemberName).Single();
-            var value = memberInfo.GetPropertyOrFieldValue(item);
+            var value = Member.GetPropertyOrFieldValue(item);
 
-            CellValues cellType = InferCellType(memberInfo);
+            CellValues cellType = InferCellType(Member);
 
             if (value == null)
                 value = string.Empty;
@@ -64,7 +69,5 @@ namespace ExcelImports.Core
             throw new ArgumentOutOfRangeException("member", string.Format("Could not determine cell type for {0}",
                 member.GetType().Name));
         }
-
-
     }
 }

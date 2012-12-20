@@ -11,7 +11,7 @@ namespace ExcelImports
 
             bool lastWasUpper = char.IsUpper(member.Name[0]);
 
-            for (int i = 2; i < sb.Length - 1; i++)
+            for (int i = 1; i < sb.Length - 1; i++)
             {
                 char current = sb[i];
                 char next = sb[i + 1];

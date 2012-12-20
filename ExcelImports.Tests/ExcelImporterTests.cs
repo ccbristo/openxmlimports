@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using ExcelImports.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -9,6 +11,26 @@ namespace ExcelImports.Tests
     [TestClass]
     public class ExcelImporterTests
     {
+        private static readonly MemberInfo SingleTableHierarchyItem1sMember;
+        private static readonly MemberInfo SingleTableHierarchyIMember;
+        private static readonly MemberInfo SingleTableHierarchyStringFieldMember;
+        private static readonly MemberInfo SingleTableHierarchyADateMember;
+
+        static ExcelImporterTests()
+        {
+            Expression<Func<SingleTableHierarchy, List<SingleTableItem>>> singleTableHierarchyItems = st => st.SingleTableItems;
+            SingleTableHierarchyItem1sMember = singleTableHierarchyItems.GetMemberInfo();
+
+            Expression<Func<SingleTableItem, int>> iProperty = sti => sti.I;
+            SingleTableHierarchyIMember = iProperty.GetMemberInfo();
+
+            Expression<Func<SingleTableItem, string>> stringField = sti => sti.StringField;
+            SingleTableHierarchyStringFieldMember = stringField.GetMemberInfo();
+
+            Expression<Func<SingleTableItem, DateTime?>> aDateProperty = sti => sti.ADate;
+            SingleTableHierarchyADateMember = aDateProperty.GetMemberInfo();
+        }
+
         [TestMethod]
         public void Valid_Import()
         {
@@ -16,12 +38,14 @@ namespace ExcelImports.Tests
             DateTime newYears2012 = new DateTime(2013, 1, 1);
 
             var config = new WorkbookConfiguration(typeof(SingleTableHierarchy));
-            var singleTableItemSheet = new WorksheetConfiguration(typeof(SingleTableItem), "Single Table", "SingleTableItems");
+            var stylesheetProvider = new DefaultStylesheetProvider();
+            var singleTableItemSheet = new WorksheetConfiguration(typeof(SingleTableItem), "Single Table", "SingleTableItems", stylesheetProvider);
             singleTableItemSheet.SheetName = "Item 1s";
-            singleTableItemSheet.AddColumn("I", "I");
-            var dateColumn = singleTableItemSheet.AddColumn("A Date", "ADate");
+
+            singleTableItemSheet.AddColumn("I", SingleTableHierarchyIMember);
+            var dateColumn = singleTableItemSheet.AddColumn("A Date", SingleTableHierarchyADateMember);
             dateColumn.CellFormat = config.StylesheetProvider.DateFormat;
-            singleTableItemSheet.AddColumn("String Field", "StringField");
+            singleTableItemSheet.AddColumn("String Field", SingleTableHierarchyStringFieldMember);
             config.AddWorksheet(singleTableItemSheet);
 
             SingleTableHierarchy result;
@@ -52,12 +76,13 @@ namespace ExcelImports.Tests
         public void Missing_Worksheet()
         {
             var config = new WorkbookConfiguration(typeof(SingleTableHierarchy));
-            var singleTableItemSheet = new WorksheetConfiguration(typeof(SingleTableItem), "Single Table", "SingleTableItems");
+            var stylesheetProvider = new DefaultStylesheetProvider();
+            var singleTableItemSheet = new WorksheetConfiguration(typeof(SingleTableItem), "Single Table", "SingleTableItems", stylesheetProvider);
             singleTableItemSheet.SheetName = "Item 1s";
-            singleTableItemSheet.AddColumn("I", "I");
-            var dateColumn = singleTableItemSheet.AddColumn("A Date", "ADate");
+            singleTableItemSheet.AddColumn("I", SingleTableHierarchyIMember);
+            var dateColumn = singleTableItemSheet.AddColumn("A Date", SingleTableHierarchyADateMember);
             dateColumn.CellFormat = config.StylesheetProvider.DateFormat;
-            singleTableItemSheet.AddColumn("String Field", "StringField");
+            singleTableItemSheet.AddColumn("String Field", SingleTableHierarchyStringFieldMember);
             config.AddWorksheet(singleTableItemSheet);
 
             try
@@ -78,12 +103,12 @@ namespace ExcelImports.Tests
         public void Missing_Column()
         {
             var config = new WorkbookConfiguration(typeof(SingleTableHierarchy));
-            var singleTableItemSheet = new WorksheetConfiguration(typeof(SingleTableItem), "Single Table", "SingleTableItems");
+            var singleTableItemSheet = new WorksheetConfiguration(typeof(SingleTableItem), "Single Table", "SingleTableItems", config.StylesheetProvider);
             singleTableItemSheet.SheetName = "Item 1s";
-            singleTableItemSheet.AddColumn("I", "I");
-            var dateColumn = singleTableItemSheet.AddColumn("A Date", "ADate");
+            singleTableItemSheet.AddColumn("I", SingleTableHierarchyIMember);
+            var dateColumn = singleTableItemSheet.AddColumn("A Date", SingleTableHierarchyADateMember);
             dateColumn.CellFormat = config.StylesheetProvider.DateFormat;
-            singleTableItemSheet.AddColumn("String Field", "StringField");
+            singleTableItemSheet.AddColumn("String Field", SingleTableHierarchyStringFieldMember);
             config.AddWorksheet(singleTableItemSheet);
 
             try
@@ -110,12 +135,12 @@ namespace ExcelImports.Tests
         public void Duplicated_Columns()
         {
             var config = new WorkbookConfiguration(typeof(SingleTableHierarchy));
-            var singleTableItemSheet = new WorksheetConfiguration(typeof(SingleTableItem), "Single Table", "SingleTableItems");
+            var singleTableItemSheet = new WorksheetConfiguration(typeof(SingleTableItem), "Single Table", "SingleTableItems", config.StylesheetProvider);
             singleTableItemSheet.SheetName = "Item 1s";
-            singleTableItemSheet.AddColumn("I", "I");
-            var dateColumn = singleTableItemSheet.AddColumn("A Date", "ADate");
+            singleTableItemSheet.AddColumn("I", SingleTableHierarchyIMember);
+            var dateColumn = singleTableItemSheet.AddColumn("A Date", SingleTableHierarchyADateMember);
             dateColumn.CellFormat = config.StylesheetProvider.DateFormat;
-            singleTableItemSheet.AddColumn("String Field", "StringField");
+            singleTableItemSheet.AddColumn("String Field", SingleTableHierarchyStringFieldMember);
             config.AddWorksheet(singleTableItemSheet);
 
             try
@@ -137,12 +162,12 @@ namespace ExcelImports.Tests
         {
             var config = new WorkbookConfiguration(typeof(SingleTableHierarchy));
             config.ErrorPolicy = new AggregatingExceptionErrorPolicy();
-            var singleTableItemSheet = new WorksheetConfiguration(typeof(SingleTableItem), "Single Table", "SingleTableItems");
+            var singleTableItemSheet = new WorksheetConfiguration(typeof(SingleTableItem), "Single Table", "SingleTableItems", config.StylesheetProvider);
             singleTableItemSheet.SheetName = "Item 1s";
-            singleTableItemSheet.AddColumn("I", "I");
-            var dateColumn = singleTableItemSheet.AddColumn("A Date", "ADate");
+            singleTableItemSheet.AddColumn("I", SingleTableHierarchyIMember);
+            var dateColumn = singleTableItemSheet.AddColumn("A Date", SingleTableHierarchyADateMember);
             dateColumn.CellFormat = config.StylesheetProvider.DateFormat;
-            singleTableItemSheet.AddColumn("String Field", "StringField");
+            singleTableItemSheet.AddColumn("String Field", SingleTableHierarchyStringFieldMember);
             config.AddWorksheet(singleTableItemSheet);
 
             try
@@ -157,6 +182,11 @@ namespace ExcelImports.Tests
             {
                 Assert.AreEqual(2, ex.Errors.Count());
             }
+        }
+
+        private static MemberInfo GetMember<T, TResult>(Expression<Func<T, TResult>> exp)
+        {
+            return exp.GetMemberInfo();
         }
     }
 }

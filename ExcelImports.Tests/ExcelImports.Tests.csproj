@@ -68,6 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CamelCaseNamingConventionTests.cs" />
+    <Compile Include="ColumnBuilderTests.cs" />
     <Compile Include="ColumnReferenceTests.cs" />
     <Compile Include="AggregatingExceptionErrorPolicyTests.cs" />
     <Compile Include="ExcelConfigurationTests.cs" />

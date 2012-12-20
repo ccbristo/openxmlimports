@@ -10,21 +10,29 @@ namespace ExcelImports.Core
     public class WorksheetConfiguration : IEnumerable<ColumnConfiguration>
     {
         private readonly List<ColumnConfiguration> mColumns = new List<ColumnConfiguration>();
+        internal IStylesheetProvider StylesheetProvider { get; set; }
 
         public IEnumerable<ColumnConfiguration> Columns
         {
             get { return mColumns.AsReadOnly(); }
         }
 
-        internal WorksheetConfiguration(Type boundType)
-            : this(boundType, null, null)
+        internal WorksheetConfiguration(IStylesheetProvider stylesheetProvider)
+            : this(null, null, null, stylesheetProvider)
         { }
 
-        public WorksheetConfiguration(Type boundType, string sheetName, string memberName)
+        internal WorksheetConfiguration(Type boundType, IStylesheetProvider stylesheetProvider)
+            : this(boundType, null, null, stylesheetProvider)
+        { }
+
+        public WorksheetConfiguration(Type boundType, string sheetName, string memberName,
+            IStylesheetProvider stylesheetProvider)
         {
             this.SheetName = sheetName;
             this.MemberName = memberName;
             this.BoundType = boundType;
+            this.StylesheetProvider = stylesheetProvider;
+
         }
 
         public Type BoundType { get; set; }
@@ -32,16 +40,20 @@ namespace ExcelImports.Core
         public string SheetName { get; set; }
         public bool ExportOnly { get; set; }
 
-        public ColumnConfiguration AddColumn(string columnName, string memberName)
+        public ColumnConfiguration AddColumn(string columnName, MemberInfo member)
         {
             var column = new ColumnConfiguration
             {
                 Name = columnName,
-                MemberName = memberName
+                Member = member
             };
 
-            mColumns.Add(column);
+            return AddColumn(column);
+        }
 
+        public ColumnConfiguration AddColumn(ColumnConfiguration column)
+        {
+            mColumns.Add(column);
             return column;
         }
 

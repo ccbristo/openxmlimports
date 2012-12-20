@@ -11,16 +11,20 @@ namespace ExcelImports
     {
         private readonly WorkbookConfiguration mConfiguration = new WorkbookConfiguration(typeof(TWorkbook));
         private readonly Dictionary<object, WorksheetBuilder> worksheets = new Dictionary<object, WorksheetBuilder>();
-        private Func<TWorkbook, string> namer;
-        public INamingConvention WorksheetNamingConvention { get; set; }
+        private INamingConvention WorksheetNamingConvention;
+
+        public WorkbookBuilder()
+        {
+            WorksheetNamingConvention = new CamelCaseNamingConvention();
+        }
 
         public WorkbookConfiguration Create()
         {
             // TODO [ccb] Do we need a way to differentiate entity types from non-entity types ala NH?
             // Need to differentiate things that will be tables from other properties...
             // Ex:
-            // class X{ string S; IList<Item> Items { get; set; } }
-            // Should only pay attention to Items.
+            // class X{ Something SingleItemProperty; IList<Item> Items { get; set; } }
+            // Should pay attention Items and SingleItemProperty.
 
             var workbookMembers = typeof(TWorkbook).GetMembers(BindingFlags.Public | BindingFlags.Instance)
                 .Where(m => m.IsPropertyOrField() &&
@@ -28,21 +32,17 @@ namespace ExcelImports
 
             foreach (var member in workbookMembers)
             {
-                var worksheet = GetTypedWorksheet(member);
-                this.mConfiguration.AddWorksheet(worksheet.Configuration);
+                var worksheetBuilder = GetTypedWorksheet(member);
+                worksheetBuilder.ConfigureColumns();
+                this.mConfiguration.AddWorksheet(worksheetBuilder.Configuration);
             }
 
             return mConfiguration;
         }
 
-        public WorkbookBuilder<TWorkbook> Named(string name)
+        public WorkbookBuilder<TWorkbook> Stylesheet(IStylesheetProvider stylesheetProvider)
         {
-            return Named(t => name);
-        }
-
-        public WorkbookBuilder<TWorkbook> Named(Func<TWorkbook, string> namer)
-        {
-            this.namer = namer;
+            mConfiguration.StylesheetProvider = stylesheetProvider;
             return this;
         }
 
@@ -60,9 +60,10 @@ namespace ExcelImports
 
             if (!worksheets.TryGetValue(name, out worksheetConfig))
             {
-                worksheetConfig = new WorksheetBuilder();
+                worksheetConfig = new WorksheetBuilder(mConfiguration.StylesheetProvider);
                 worksheets[name] = worksheetConfig;
             }
+
             return worksheetConfig;
         }
 
@@ -86,16 +87,17 @@ namespace ExcelImports
         {
             var memberInfo = memberExp.GetMemberInfo();
 
-            WorksheetBuilder worksheetConfig;
-            bool found = worksheets.TryGetValue(memberInfo, out worksheetConfig);
+            WorksheetBuilder worksheetBuilder;
+            bool found = worksheets.TryGetValue(memberInfo, out worksheetBuilder);
 
             if (!found)
             {
-                worksheetConfig = new WorksheetBuilder<TWorksheet>();
-                worksheets[memberInfo] = worksheetConfig;
+                string worksheetName = WorksheetNamingConvention.GetName(memberInfo);
+                worksheetBuilder = new WorksheetBuilder<TWorksheet>(worksheetName, memberInfo.Name, mConfiguration.StylesheetProvider);
+                worksheets[memberInfo] = worksheetBuilder;
             }
 
-            var castConfig = (WorksheetBuilder<TWorksheet>)worksheetConfig;
+            var castConfig = (WorksheetBuilder<TWorksheet>)worksheetBuilder;
             return castConfig;
         }
 

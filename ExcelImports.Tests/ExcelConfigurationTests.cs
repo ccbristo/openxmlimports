@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ExcelImports.Tests
@@ -7,9 +8,72 @@ namespace ExcelImports.Tests
     [TestClass]
     public class ExcelConfigurationTests
     {
-        // TODO: Implement this test. Need to focus on getting the underlying semantic model right before I focus on the DSL.
-        //[TestMethod]
-        public void TestBasicConfig()
+        [TestMethod]
+        public void DefaultConfig()
+        {
+            var config = ExcelConfiguration.Workbook<SimpleHierarchy>()
+                .Create();
+
+            Assert.AreEqual(2, config.Count(), "number of worksheet configs");
+
+            var item1Config = config.Single(wsc => wsc.BoundType == typeof(Item1));
+            Assert.AreEqual(2, item1Config.Columns.Count());
+
+            var item1NameColumn = item1Config.Single(column => StringComparer.Ordinal.Equals(column.Name, "Name"));
+            Assert.AreEqual("Name", item1NameColumn.Member.Name);
+
+            var item1ValueColumn = item1Config.Single(column => StringComparer.Ordinal.Equals(column.Name, "Value"));
+            Assert.AreEqual(item1ValueColumn.Member.Name, "Value");
+
+            var item2Config = config.Single(wsc => wsc.BoundType == typeof(Item2));
+            Assert.AreEqual(2, item2Config.Columns.Count());
+
+            var item2TitleColumn = item2Config.Single(column => StringComparer.Ordinal.Equals(column.Name, "Title"));
+            Assert.AreEqual(item2TitleColumn.Member.Name, "Title");
+
+            var item2ADateColumn = item2Config.Single(column => StringComparer.Ordinal.Equals(column.Name, "A Date"));
+            Assert.AreEqual(item2ADateColumn.Member.Name, "ADate");
+        }
+
+        [TestMethod]
+        public void Override_Sheet_Name()
+        {
+            var config = ExcelConfiguration.Workbook<SimpleHierarchy>()
+                .Worksheet(sh => sh.Item1s, item1Sheet =>
+                    {
+                        item1Sheet.Named("The Item1s");
+                    })
+                .Create();
+
+            Assert.AreEqual(2, config.Count(), "number of worksheet configs");
+
+            var item1Config = config.Single(wsc => wsc.BoundType == typeof(Item1));
+            Assert.AreEqual("The Item1s", item1Config.SheetName);
+        }
+
+        [TestMethod]
+        public void Override_Column_Name()
+        {
+            var config = ExcelConfiguration.Workbook<SimpleHierarchy>()
+                .Worksheet(sh => sh.Item1s, item1Sheet =>
+                {
+                    item1Sheet.Column(item => item.Name, nameCol =>
+                    {
+                        nameCol.Named("The Name Column");
+                    });
+
+                })
+                .Create();
+
+            Assert.AreEqual(2, config.Count(), "number of worksheet configs");
+
+            var item1Config = config.Single(wsc => wsc.BoundType == typeof(Item1));
+            var nameColumn = item1Config.Single(col => StringComparer.Ordinal.Equals("Name", col.Member.Name));
+            Assert.AreEqual("The Name Column", nameColumn.Name);
+        }
+
+        [TestMethod]
+        public void AAAAAA()
         {
             var workbook = new SimpleHierarchy
             {
@@ -35,6 +99,14 @@ namespace ExcelImports.Tests
 
             var config = ExcelConfiguration.Workbook<SimpleHierarchy>()
                 .Create();
+
+            var dateColumn = config.GetWorksheet("Item 2s").Single(c => c.Name == "A Date");
+            Assert.AreSame(config.StylesheetProvider.DateFormat, dateColumn.CellFormat);
+
+            using (var fs = System.IO.File.Open("output.xlsx", System.IO.FileMode.Create, System.IO.FileAccess.ReadWrite))
+                config.Export(workbook, fs);
+
+            System.Diagnostics.Process.Start("output.xlsx");
         }
 
         //[TestMethod]
@@ -43,16 +115,15 @@ namespace ExcelImports.Tests
             Assert.Fail("So far, all this test does is check some of the syntax I would like to have.");
 
             ExcelConfiguration.Workbook<PropertyRateSet>()
-                .Named("Property Rate Set.xml")
                 .Worksheet("Instructions", instructionsSheet => instructionsSheet.ExportOnly())
                 .Worksheet(prs => prs.StateGroups, stateGroupSheet =>
                     {
                         stateGroupSheet
                             .Column(sga => sga.State, columnConfig =>
                                 {
-                                    columnConfig
-                                        .OneOf(AllStates())
-                                        .ListValidValuesOnError(false);
+                                    //columnConfig
+                                    //    .OneOf(AllStates())
+                                    //    .ListValidValuesOnError(false);
                                 });
 
                     })
