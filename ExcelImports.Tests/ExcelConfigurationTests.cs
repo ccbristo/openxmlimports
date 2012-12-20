@@ -72,49 +72,6 @@ namespace ExcelImports.Tests
             Assert.AreEqual("The Name Column", nameColumn.Name);
         }
 
-        [TestMethod]
-        public void AAAAAA()
-        {
-            var workbook = new SimpleHierarchy
-            {
-                I = 5,
-                S = "Some text",
-                Item1s = new List<Item1>()
-                {
-                    new Item1{ Name = "First Item 1", Value = 5 },
-                    new Item1{ Name = "Second Item 1", Value = 4 },
-                    new Item1{ Name = "Third Item 1", Value = 3 },
-                    new Item1{ Name = "Fourth Item 1", Value = 2 },
-                    new Item1{ Name = "Fifth Item 1", Value = 1 }
-                },
-                Item2s = new List<Item2>()
-                {
-                    new Item2{ Title = "First Item 2", ADate = new DateTime(1981, 8, 28) },
-                    new Item2{ Title = "Second Item 2", ADate = new DateTime(1982, 8, 27) },
-                    new Item2{ Title = "Third Item 2", ADate = new DateTime(1953, 7, 11) },
-                    new Item2{ Title = "Fourth Item 2", ADate = new DateTime(1954, 2, 22) },
-                    new Item2{ Title = "Fifth Item 2", ADate = new DateTime(1984, 3, 7) }
-                }
-            };
-
-            var config = ExcelConfiguration.Workbook<SimpleHierarchy>()
-                .Worksheet(sh => sh.Item2s,
-                (item2Sheet, styles) =>
-                {
-                    item2Sheet.Column(item2 => item2.ADate,
-                        dateCol => dateCol.Format(styles.DateTimeFormat));
-                })
-                .Create();
-
-            var dateColumn = config.GetWorksheet("Item 2s").Single(c => c.Name == "A Date");
-            Assert.AreSame(config.StylesheetProvider.DateTimeFormat, dateColumn.CellFormat);
-
-            using (var fs = System.IO.File.Open("output.xlsx", System.IO.FileMode.Create, System.IO.FileAccess.ReadWrite))
-                config.Export(workbook, fs);
-
-            System.Diagnostics.Process.Start("output.xlsx");
-        }
-
         //[TestMethod]
         public void Test1()
         {
