@@ -34,6 +34,12 @@ namespace ExcelImports.Core
             throw new DuplicatedColumnException("Found multiple columns named \"{0}\".", columnName);
         }
 
+        public void OnNullableColumnViolation(string worksheetName, string columnName, ColumnReference colRef, int rowIndex)
+        {
+            throw new NullableColumnViolationException("Column \"{0}\" on sheet \"{1}\" does not allow empty values. An empty value was found in cell {2}{3}.",
+                columnName, worksheetName, colRef, rowIndex);
+        }
+
         public void OnImportComplete()
         {
             // nop

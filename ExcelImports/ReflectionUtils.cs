@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
@@ -8,7 +9,7 @@ namespace ExcelImports
     {
         public static Type GetClosingInterface(this Type type, Type openInterface)
         {
-            var closers = type.GetInterfaces()
+            var closers = type.GetAllInterfaces()
                 .Where(iFace => iFace.IsGenericType && iFace.GetGenericTypeDefinition() == openInterface)
                 .ToList();
 
@@ -21,8 +22,20 @@ namespace ExcelImports
 
         public static bool ClosesInterface(this Type type, Type openInterface)
         {
-            bool result = type.GetInterfaces().Any(iFace => iFace.IsGenericType && iFace.GetGenericTypeDefinition() == openInterface);
+            bool result = type.GetAllInterfaces().Any(iFace => iFace.IsGenericType && iFace.GetGenericTypeDefinition() == openInterface);
             return result;
+        }
+
+        public static IEnumerable<Type> GetAllInterfaces(this Type type)
+        {
+            var interfaces = new List<Type>();
+
+            if (type.IsInterface)
+                interfaces.Add(type);
+
+            interfaces.AddRange(type.GetInterfaces());
+
+            return interfaces;
         }
 
         public static bool IsPropertyOrField(this MemberInfo memberInfo)

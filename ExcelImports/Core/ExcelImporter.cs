@@ -39,7 +39,7 @@ namespace ExcelImports.Core
                 var columnMap = MapColumns(worksheetConfig, workbookConfiguration.ErrorPolicy,
                     headerRow, sharedStringTable);
                 AddWorksheetItems(dataRows, list, worksheetConfig,
-                    columnMap, sharedStringTable);
+                    columnMap, sharedStringTable, workbookConfiguration.ErrorPolicy);
 
             }
 
@@ -74,8 +74,11 @@ namespace ExcelImports.Core
             IList list,
             WorksheetConfiguration worksheetConfig,
             IDictionary<ColumnConfiguration, ColumnReference> columnMap,
-            SharedStringTable sharedStrings)
+            SharedStringTable sharedStrings,
+            IErrorPolicy errorPolicy)
         {
+            int rowIndex = 2; // data starts on row 2
+
             foreach (var row in dataRows)
             {
                 var item = Create(worksheetConfig.BoundType);
@@ -87,14 +90,22 @@ namespace ExcelImports.Core
                     var colRef = columnMap[column];
                     var cell = row.Elements<Cell>().SingleOrDefault(c => c.CellReference.Column() == colRef);
 
-                    // TODO [ccb] Should probably have support for marking members as non-nullable
-                    if (cell == null)
-                        continue;
+                    bool cellHasValue = cell != null && cell.CellValue != null;
 
-                    string text = cell.GetCellText(sharedStrings);
-                    column.SetValue(item, text);
+                    if (!cellHasValue && !column.AllowNull)
+                    {
+                        errorPolicy.OnNullableColumnViolation(worksheetConfig.SheetName, column.Name,
+                            colRef, rowIndex);
+                        continue;
+                    }
+                    else if (cellHasValue)
+                    {
+                        string text = cell.GetCellText(sharedStrings);
+                        column.SetValue(item, text);
+                    }
                 }
 
+                rowIndex++;
                 list.Add(item);
             }
         }

@@ -5,6 +5,18 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ExcelImports.Tests
 {
+    public class NullabilityWorkbookEntity
+    {
+        public IList<NullabilityWorksheetEntity> Items { get; set; }
+    }
+
+    public class NullabilityWorksheetEntity
+    {
+        public int Value { get; set; }
+        public string Reference { get; set; }
+        public int? NullableProp { get; set; }
+    }
+
     [TestClass]
     public class ExcelConfigurationTests
     {
@@ -70,6 +82,68 @@ namespace ExcelImports.Tests
             var item1Config = config.Single(wsc => wsc.BoundType == typeof(Item1));
             var nameColumn = item1Config.Single(col => StringComparer.Ordinal.Equals("Name", col.Member.Name));
             Assert.AreEqual("The Name Column", nameColumn.Name);
+        }
+
+        [TestMethod]
+        public void Reference_Types_Should_Allow_Null_By_Default()
+        {
+            var config = ExcelConfiguration.Workbook<NullabilityWorkbookEntity>()
+                .Create();
+
+            var sheetConfig = config.Single(wsc => wsc.BoundType == typeof(NullabilityWorksheetEntity));
+            var referenceColumn = sheetConfig.Single(col => StringComparer.Ordinal.Equals("Reference", col.Member.Name));
+
+            Assert.IsTrue(referenceColumn.AllowNull, "Reference column is not nullable.");
+        }
+
+        [TestMethod]
+        public void Values_Types_Should_Not_Allow_Null_By_Default()
+        {
+            var config = ExcelConfiguration.Workbook<NullabilityWorkbookEntity>()
+                .Create();
+
+            var sheetConfig = config.Single(wsc => wsc.BoundType == typeof(NullabilityWorksheetEntity));
+            var valueColumn = sheetConfig.Single(col => StringComparer.Ordinal.Equals("Value", col.Member.Name));
+
+            Assert.IsFalse(valueColumn.AllowNull, "Value column is nullable.");
+        }
+
+        [TestMethod]
+        public void Explicitly_Prohibit_Null_On_Reference_Type()
+        {
+            var config = ExcelConfiguration.Workbook<NullabilityWorkbookEntity>()
+                .Worksheet(sh => sh.Items, (itemSheet, styles) =>
+                {
+                    itemSheet.Column(item => item.Reference, refCol =>
+                    {
+                        refCol.Nullable(false);
+                    });
+                })
+                .Create();
+
+            var itemsConfig = config.Single(wsc => wsc.BoundType == typeof(NullabilityWorksheetEntity));
+            var referenceColumn = itemsConfig.Single(col => StringComparer.Ordinal.Equals("Reference", col.Member.Name));
+
+            Assert.IsFalse(referenceColumn.AllowNull, "Reference column is nullable.");
+        }
+
+        [TestMethod]
+        public void Explicitly_Allow_Null_On_Value_Type()
+        {
+            var config = ExcelConfiguration.Workbook<NullabilityWorkbookEntity>()
+                .Worksheet(sh => sh.Items, (itemSheet, styles) =>
+                {
+                    itemSheet.Column(item => item.Reference, refCol =>
+                    {
+                        refCol.Nullable(true);
+                    });
+                })
+                .Create();
+
+            var itemsConfig = config.Single(wsc => wsc.BoundType == typeof(NullabilityWorksheetEntity));
+            var referenceColumn = itemsConfig.Single(col => StringComparer.Ordinal.Equals("Reference", col.Member.Name));
+
+            Assert.IsTrue(referenceColumn.AllowNull, "Reference column is not nullable.");
         }
 
         //[TestMethod]

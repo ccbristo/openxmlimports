@@ -9,12 +9,13 @@ namespace ExcelImports.Core
         internal ColumnConfiguration()
         {
             //OptionComparer = Comparer.DefaultInvariant;
+            AllowNull = true;
         }
 
         public string Name { get; set; }
         public MemberInfo Member { get; set; }
-
         public NumberingFormat CellFormat { get; set; }
+        public bool AllowNull { get; set; }
 
         // TODO [ccb] Implement these features.
         //public IEnumerable ValidValues { get; set; }

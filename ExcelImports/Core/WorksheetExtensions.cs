@@ -17,7 +17,7 @@ namespace ExcelImports.Core
                 return sharedStringItem.Text.Text;
             }
 
-            return cell.CellValue.Text;
+            return cell.CellValue == null ? string.Empty : cell.CellValue.Text;
         }
 
         static readonly char[] numbers = Enumerable.Range('0', 10).Select(i => (char)i).ToArray();

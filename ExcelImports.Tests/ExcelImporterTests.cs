@@ -73,6 +73,39 @@ namespace ExcelImports.Tests
         }
 
         [TestMethod]
+        public void Error_If_Null_In_A_Non_Nullable_Column()
+        {
+            var config = new WorkbookConfiguration(typeof(SingleTableHierarchy));
+            var stylesheetProvider = new DefaultStylesheetProvider();
+            var singleTableItemSheet = new WorksheetConfiguration(typeof(SingleTableItem), "Single Table", "SingleTableItems", stylesheetProvider);
+            singleTableItemSheet.SheetName = "Item 1s";
+
+            singleTableItemSheet.AddColumn("I", SingleTableHierarchyIMember);
+            var dateColumn = singleTableItemSheet.AddColumn("A Date", SingleTableHierarchyADateMember);
+            dateColumn.CellFormat = config.StylesheetProvider.DateFormat;
+            dateColumn.AllowNull = false;
+            singleTableItemSheet.AddColumn("String Field", SingleTableHierarchyStringFieldMember);
+            config.AddWorksheet(singleTableItemSheet);
+
+            try
+            {
+                SingleTableHierarchy result;
+                using (var input = Assembly.GetExecutingAssembly().GetManifestResourceStream("ExcelImports.Tests.TestFiles.Null_In_A_Non_Nullable_Column.xlsx"))
+                    result = (SingleTableHierarchy)config.Import(input);
+
+                Assert.Fail("Should have failed due to null in a non-nullable column.");
+            }
+            catch (NullableColumnViolationException ex)
+            {
+                Assert.AreEqual(
+                    "Column \"A Date\" on sheet \"Item 1s\" does not allow empty values. An empty value was found in cell B2.",
+                    ex.Message);
+            }
+
+
+        }
+
+        [TestMethod]
         public void Missing_Worksheet()
         {
             var config = new WorkbookConfiguration(typeof(SingleTableHierarchy));

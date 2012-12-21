@@ -141,6 +141,39 @@ namespace ExcelImports.Tests
             }
         }
 
+        [TestMethod]
+        public void Export_Null_In_Non_Nullable_Column_Throws_Exception()
+        {
+            var config = new WorkbookConfiguration(typeof(SingleTableHierarchy));
+            var dataSource = new SingleTableHierarchy()
+            {
+                SingleTableItems = new List<SingleTableItem>()
+                {
+                    new SingleTableItem{ StringField = null, I = 1 }
+                }
+            };
+
+            var itemsSheetConfig = new WorksheetConfiguration(typeof(Item1), "Single Table Items", "SingleTableItems", config.StylesheetProvider);
+            var columnConfig = itemsSheetConfig.AddColumn("String Field", SingleTableHierarchyStringFieldMember);
+            columnConfig.AllowNull = false;
+            config.AddWorksheet(itemsSheetConfig);
+
+            try
+            {
+                using (var output = new MemoryStream())
+                {
+                    config.Export(dataSource, output);
+                    Assert.Fail("Should have failed due to exporting null to non-nullable column.");
+                }
+            }
+            catch (NullableColumnViolationException ex)
+            {
+                Assert.AreEqual(
+                    "Cannot export null value into non-nullable column \"String Field\" on sheet \"Single Table Items\".",
+                    ex.Message);
+            }
+        }
+
         private static void SaveToFile(MemoryStream ms, string name)
         {
             using (var fs = File.OpenWrite("output.xlsx"))

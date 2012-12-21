@@ -19,6 +19,17 @@ namespace ExcelImports
             Configuration.Name = name;
             return this;
         }
+
+        public ColumnBuilder Nullable()
+        {
+            return Nullable(true);
+        }
+
+        public ColumnBuilder Nullable(bool allowNulls)
+        {
+            Configuration.AllowNull = allowNulls;
+            return this;
+        }
     }
 
     public class ColumnBuilder<TColumn>
@@ -29,6 +40,10 @@ namespace ExcelImports
         {
             this.Named(columnName);
             this.Configuration.Member = member;
+
+            var memberType = member.GetPropertyOrFieldType();
+            if (memberType.IsValueType && !memberType.IsNullable())
+                Configuration.AllowNull = false;
 
             // default datetimes to the date format
             if (typeof(TColumn).In(typeof(DateTime), typeof(DateTime?)))
@@ -44,6 +59,18 @@ namespace ExcelImports
         public ColumnBuilder<TColumn> Format(NumberingFormat format)
         {
             base.Configuration.CellFormat = format;
+            return this;
+        }
+
+        public new ColumnBuilder<TColumn> Nullable()
+        {
+            base.Nullable();
+            return this;
+        }
+
+        public new ColumnBuilder<TColumn> Nullable(bool allowNulls)
+        {
+            base.Nullable(allowNulls);
             return this;
         }
 
