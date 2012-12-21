@@ -16,6 +16,7 @@ namespace ExcelImports.Tests
             public decimal CapsINTRAWord { get; set; }
             public int Has150Numbers { get; set; }
             public string ADate { get; set; }
+            public object Has_Under_Scores { get; set; }
         }
 
         [TestMethod]
@@ -58,6 +59,12 @@ namespace ExcelImports.Tests
         public void TestNumbers()
         {
             DoTest(x => x.Has150Numbers, "Has 150 Numbers");
+        }
+
+        [TestMethod]
+        public void TestUnderscores()
+        {
+            DoTest(x => x.Has_Under_Scores, "Has Under Scores");
         }
 
         private void DoTest<T>(Expression<Func<HasMembersForTesting, T>> memberExp, string expectedName)
