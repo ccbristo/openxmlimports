@@ -22,11 +22,6 @@ namespace ExcelImports.Core
             int index = formats.IndexOf(format);
 
             if (index == -1)
-                // TODO [ccb] Should this be a hard exception like below
-                // or should an error policy be used?
-                // If it stays a hard exception, a more specific one should be thrown.
-                // As it stands now, this is used by exports, but error policies are only used by imports,
-                // and I like that. I think this should stay a hard exception.
                 throw new InvalidOperationException("The requested numbering format does not belong to the stylesheet.");
 
             return (uint)index + 1; // excel indices are 1 based
