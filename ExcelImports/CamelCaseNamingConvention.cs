@@ -10,9 +10,10 @@ namespace ExcelImports
 
         public string GetName(MemberInfo member)
         {
-            string r1 = NonLowerFollowedByUpperLower.Replace(member.Name, "$1 $2");
-            string r2 = LowerCaseFollowedByNonLower.Replace(r1, "$1 $2");
-            return r2.Replace(" _ ", " "); // TODO [ccb] Fix this so the regexes handle it correctly.
+            string noUnderscores = member.Name.Replace("_", string.Empty);
+            string spacesAddedIn_AAb = NonLowerFollowedByUpperLower.Replace(noUnderscores, "$1 $2");
+            string spacesAddedIn_aB = LowerCaseFollowedByNonLower.Replace(spacesAddedIn_AAb, "$1 $2");
+            return spacesAddedIn_aB;
         }
     }
 }
