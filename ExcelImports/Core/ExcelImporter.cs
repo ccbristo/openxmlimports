@@ -24,7 +24,7 @@ namespace ExcelImports.Core
             foreach (var worksheetConfig in workbookConfiguration)
             {
                 var sheet = worksheetConfig.GetWorksheet(sheets, workbookConfiguration.ErrorPolicy);
-                var worksheetMember = worksheetConfig.GetMemberInfo(result);
+                var worksheetMember = workbookConfiguration.GetMemberInfoFor(worksheetConfig);
                 var list = (IList)Create(worksheetMember.GetPropertyOrFieldType());
                 worksheetMember.SetPropertyOrFieldValue(result, list);
 

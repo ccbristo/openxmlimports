@@ -29,7 +29,7 @@ namespace ExcelImports.Core
                 var headerRow = CreateHeaderRow(worksheetConfig, sheetData);
                 sheetData.Append(headerRow);
 
-                IList boundMember = worksheetConfig.GetMember(workbookSource);
+                IList boundMember = workbookConfig.GetListFor(worksheetConfig, workbookSource);
                 ExportData(boundMember, worksheetConfig, sheetData, workbookConfig.StylesheetProvider);
 
                 sheets.Append(sheet);

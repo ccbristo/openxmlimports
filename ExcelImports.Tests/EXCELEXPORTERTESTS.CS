@@ -76,7 +76,7 @@ namespace ExcelImports.Tests
         [TestMethod]
         public void Can_Export_Columns()
         {
-            var config = new WorkbookConfiguration(typeof(SimpleHierarchy));
+            var config = new WorkbookConfiguration(typeof(SingleTableHierarchy));
 
             DateTime christmas2012 = new DateTime(2012, 12, 25, 11, 59, 30);
             DateTime newYears2012 = new DateTime(2013, 1, 1);

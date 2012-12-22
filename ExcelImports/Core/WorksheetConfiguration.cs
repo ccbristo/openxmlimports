@@ -69,36 +69,6 @@ namespace ExcelImports.Core
             return matchingSheets[0];
         }
 
-        internal MemberInfo GetMemberInfo(object workbookSource)
-        {
-            if (workbookSource == null)
-                throw new ArgumentNullException("workbookSource");
-
-            var memberInfos = workbookSource.GetType()
-                .GetMember(this.MemberName, BindingFlags.Public | BindingFlags.Instance);
-
-            if (memberInfos.Length == 0)
-                throw new MissingMemberException(string.Format("Could not find a public instance member named {0} on {1}",
-                    this.MemberName, workbookSource.GetType().Name));
-            else if (memberInfos.Length > 1)
-                // TODO [ccb] Verify this is the type of exception to throw and add a meaningful message.
-                throw new AmbiguousMatchException();
-
-            return memberInfos[0];
-        }
-
-        internal IList GetMember(object workbookSource)
-        {
-            var memberInfo = GetMemberInfo(workbookSource);
-            object value = memberInfo.GetPropertyOrFieldValue(workbookSource);
-
-            if (!(value is IList))
-                // TODO [ccb] Improve this message
-                throw new InvalidOperationException("Worksheet source is not an IList");
-
-            return (IList)value;
-        }
-
         public IEnumerator<ColumnConfiguration> GetEnumerator()
         {
             return mColumns.GetEnumerator();
