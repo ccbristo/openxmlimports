@@ -61,7 +61,7 @@ namespace OpenXmlImports
                 if (Columns.TryGetValue(member, out columnBuilder))
                 {
                     Configuration.AddColumn(columnBuilder.Configuration);
-                    return;
+                    continue;
                 }
 
                 columnBuilder = ColumnFor(member);

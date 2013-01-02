@@ -82,6 +82,8 @@ namespace OpenXmlImports.Tests
             var item1Config = config.Single(wsc => wsc.BoundType == typeof(Item1));
             var nameColumn = item1Config.Single(col => StringComparer.Ordinal.Equals("Name", col.Member.Name));
             Assert.AreEqual("The Name Column", nameColumn.Name);
+
+            Assert.AreEqual(2, item1Config.Columns.Count(), "number of columns");
         }
 
         [TestMethod]
