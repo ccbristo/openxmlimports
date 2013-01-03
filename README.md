@@ -58,16 +58,23 @@ Stylesheets are also used to format text, such as bold, italics, and font size. 
 
 Possible Future Features
 --------------------------------------------------
-1. Need good style sheet support. Necessary to format dates correctly.
+1. Support for max length on string columns.
+	- Will probably be in DSL for all columns, just only used by string columns.
+2. Support ignoring rows with no cells.
+3. Support for sheets which are not collection bound (No IList<>).
+	- Could put all root properties from the workbook object onto a details sheet
+	- Also support singleton on the workbook object
+4. User-friendly aliases for type names. This is probably part of a larger effort to support NH-like ITypes for coercion to/from OpenXml formats.
+	- May also need special support for decimals since excel may store them using scientific notation.
+5. Need good style sheet support. Necessary to format dates correctly.
 	- This is implemented, but doesn't feel great yet.
 	- Would be nice if styling were more strongly typed in the configuration DSL.
 	- Add support for bold/italics/underline and all permutations out of the box.
-2. Support for sheets which are not collection bound (No IList<>).
-3. Need to support shared strings correctly.
-	- Mostly important on the import side. Exporting is handled by open xml SDK.
-	- Use the shared string table during exports.
-4. Support for non-nullable/required members
-5. Support for composite types
+6. Support for non-nullable/required members
+7. Support for identifying objects
+	- Would allow for cross-sheet references w/ out creating multiple objects
+	- Could maybe just assume this is always ok.
+8. Support for composite types
 	1. Ex:
 
 			class LimitSet
@@ -76,13 +83,6 @@ Possible Future Features
 				public int Aggregate { get; set; }
 			}
 	2. This is an enhancement to implementing NH-style ITypes.
-6. Support for identifying objects
-	- Would allow for cross-sheet references w/ out creating multiple objects
-7. Ability to ignore members.
-	- WTH was I thinking w/ this one? If data is from DTOs, all eligible members should be considered. I don't think it is a good idea to allow direct importation to domain entities, but I could change my mind here.
-8. Support for max length on string columns.
-	- Will probably be in DSL for all columns, just only used by string columns.
-9. Support ignoring rows with no cells.
-	- Could maybe just assume this is always ok.
-10. User-friendly aliases for type names. This is probably part of a larger effort to support NH-like ITypes for coercion to/from OpenXml formats.
-	- May also need special support for decimals since excel may store them using scientific notation.
+9. Need to support shared strings correctly.
+	- Use the shared string table during exports.
+	- Do better testing around shared strings from excel files.
