@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using OpenXmlImports.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using OpenXmlImports.Core;
 
 namespace OpenXmlImports.Tests
 {
@@ -73,7 +73,7 @@ namespace OpenXmlImports.Tests
         }
 
         [TestMethod]
-        public void Error_If_Null_In_A_Non_Nullable_Column()
+        public void Error_If_Null_In_A_Required_Column()
         {
             var config = new WorkbookConfiguration(typeof(SingleTableHierarchy));
             var stylesheetProvider = new DefaultStylesheetProvider();
@@ -83,7 +83,7 @@ namespace OpenXmlImports.Tests
             singleTableItemSheet.AddColumn("I", SingleTableHierarchyIMember);
             var dateColumn = singleTableItemSheet.AddColumn("A Date", SingleTableHierarchyADateMember);
             dateColumn.CellFormat = config.StylesheetProvider.DateFormat;
-            dateColumn.AllowNull = false;
+            dateColumn.Required = true;
             singleTableItemSheet.AddColumn("String Field", SingleTableHierarchyStringFieldMember);
             config.AddWorksheet(singleTableItemSheet);
 
@@ -93,7 +93,7 @@ namespace OpenXmlImports.Tests
                 using (var input = Assembly.GetExecutingAssembly().GetManifestResourceStream("OpenXmlImports.Tests.TestFiles.Null_In_A_Non_Nullable_Column.xlsx"))
                     result = (SingleTableHierarchy)config.Import(input);
 
-                Assert.Fail("Should have failed due to null in a non-nullable column.");
+                Assert.Fail("Should have failed due to null in a required column.");
             }
             catch (NullableColumnViolationException ex)
             {
@@ -197,9 +197,12 @@ namespace OpenXmlImports.Tests
             config.ErrorPolicy = new AggregatingExceptionErrorPolicy();
             var singleTableItemSheet = new WorksheetConfiguration(typeof(SingleTableItem), "Single Table", "SingleTableItems", config.StylesheetProvider);
             singleTableItemSheet.SheetName = "Item 1s";
-            singleTableItemSheet.AddColumn("I", SingleTableHierarchyIMember);
+            var iColumn = singleTableItemSheet.AddColumn("I", SingleTableHierarchyIMember);
+            iColumn.Required = false;
+
             var dateColumn = singleTableItemSheet.AddColumn("A Date", SingleTableHierarchyADateMember);
             dateColumn.CellFormat = config.StylesheetProvider.DateFormat;
+            dateColumn.Required = false;
             singleTableItemSheet.AddColumn("String Field", SingleTableHierarchyStringFieldMember);
             config.AddWorksheet(singleTableItemSheet);
 

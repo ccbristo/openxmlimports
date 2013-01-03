@@ -20,14 +20,14 @@ namespace OpenXmlImports
             return this;
         }
 
-        public ColumnBuilder Nullable()
+        public ColumnBuilder Required()
         {
-            return Nullable(true);
+            return Required(true);
         }
 
-        public ColumnBuilder Nullable(bool allowNulls)
+        public ColumnBuilder Required(bool required)
         {
-            Configuration.AllowNull = allowNulls;
+            Configuration.Required = required;
             return this;
         }
     }
@@ -42,8 +42,8 @@ namespace OpenXmlImports
             this.Configuration.Member = member;
 
             var memberType = member.GetPropertyOrFieldType();
-            if (memberType.IsValueType && !memberType.IsNullable())
-                Configuration.AllowNull = false;
+            bool required = memberType.IsValueType && !memberType.IsNullable();
+            Configuration.Required = required;
 
             // default datetimes to the date format
             if (typeof(TColumn).In(typeof(DateTime), typeof(DateTime?)))
@@ -62,15 +62,15 @@ namespace OpenXmlImports
             return this;
         }
 
-        public new ColumnBuilder<TColumn> Nullable()
+        public new ColumnBuilder<TColumn> Required()
         {
-            base.Nullable();
+            base.Required();
             return this;
         }
 
-        public new ColumnBuilder<TColumn> Nullable(bool allowNulls)
+        public new ColumnBuilder<TColumn> Required(bool required)
         {
-            base.Nullable(allowNulls);
+            base.Required(required);
             return this;
         }
 

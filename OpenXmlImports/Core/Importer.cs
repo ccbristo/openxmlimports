@@ -92,7 +92,7 @@ namespace OpenXmlImports.Core
 
                     bool cellHasValue = cell != null && cell.CellValue != null;
 
-                    if (!cellHasValue && !column.AllowNull)
+                    if (!cellHasValue && column.Required)
                     {
                         errorPolicy.OnNullableColumnViolation(worksheetConfig.SheetName, column.Name,
                             colRef, rowIndex);

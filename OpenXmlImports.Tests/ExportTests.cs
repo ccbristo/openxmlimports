@@ -6,8 +6,8 @@ using System.Linq.Expressions;
 using System.Reflection;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
-using OpenXmlImports.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using OpenXmlImports.Core;
 
 namespace OpenXmlImports.Tests
 {
@@ -142,7 +142,7 @@ namespace OpenXmlImports.Tests
         }
 
         [TestMethod]
-        public void Export_Null_In_Non_Nullable_Column_Throws_Exception()
+        public void Export_Null_In_Required_Column_Throws_Exception()
         {
             var config = new WorkbookConfiguration(typeof(SingleTableHierarchy));
             var dataSource = new SingleTableHierarchy()
@@ -155,7 +155,7 @@ namespace OpenXmlImports.Tests
 
             var itemsSheetConfig = new WorksheetConfiguration(typeof(Item1), "Single Table Items", "SingleTableItems", config.StylesheetProvider);
             var columnConfig = itemsSheetConfig.AddColumn("String Field", SingleTableHierarchyStringFieldMember);
-            columnConfig.AllowNull = false;
+            columnConfig.Required = true;
             config.AddWorksheet(itemsSheetConfig);
 
             try
@@ -163,7 +163,7 @@ namespace OpenXmlImports.Tests
                 using (var output = new MemoryStream())
                 {
                     config.Export(dataSource, output);
-                    Assert.Fail("Should have failed due to exporting null to non-nullable column.");
+                    Assert.Fail("Should have failed due to exporting null to required column.");
                 }
             }
             catch (NullableColumnViolationException ex)

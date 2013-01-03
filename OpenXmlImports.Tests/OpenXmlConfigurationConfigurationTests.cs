@@ -87,7 +87,7 @@ namespace OpenXmlImports.Tests
         }
 
         [TestMethod]
-        public void Reference_Types_Should_Allow_Null_By_Default()
+        public void Reference_Types_Should_Not_Be_Required_By_Default()
         {
             var config = OpenXmlConfiguration.Workbook<NullabilityWorkbookEntity>()
                 .Create();
@@ -95,11 +95,11 @@ namespace OpenXmlImports.Tests
             var sheetConfig = config.Single(wsc => wsc.BoundType == typeof(NullabilityWorksheetEntity));
             var referenceColumn = sheetConfig.Single(col => StringComparer.Ordinal.Equals("Reference", col.Member.Name));
 
-            Assert.IsTrue(referenceColumn.AllowNull, "Reference column is not nullable.");
+            Assert.IsFalse(referenceColumn.Required, "Reference column is required.");
         }
 
         [TestMethod]
-        public void Values_Types_Should_Not_Allow_Null_By_Default()
+        public void Values_Types_Should_Be_Required_By_Default()
         {
             var config = OpenXmlConfiguration.Workbook<NullabilityWorkbookEntity>()
                 .Create();
@@ -107,18 +107,18 @@ namespace OpenXmlImports.Tests
             var sheetConfig = config.Single(wsc => wsc.BoundType == typeof(NullabilityWorksheetEntity));
             var valueColumn = sheetConfig.Single(col => StringComparer.Ordinal.Equals("Value", col.Member.Name));
 
-            Assert.IsFalse(valueColumn.AllowNull, "Value column is nullable.");
+            Assert.IsTrue(valueColumn.Required, "Value column is not required.");
         }
 
         [TestMethod]
-        public void Explicitly_Prohibit_Null_On_Reference_Type()
+        public void Explicitly_Require_Reference_Type()
         {
             var config = OpenXmlConfiguration.Workbook<NullabilityWorkbookEntity>()
                 .Worksheet(sh => sh.Items, (itemSheet, styles) =>
                 {
                     itemSheet.Column(item => item.Reference, refCol =>
                     {
-                        refCol.Nullable(false);
+                        refCol.Required(true);
                     });
                 })
                 .Create();
@@ -126,18 +126,18 @@ namespace OpenXmlImports.Tests
             var itemsConfig = config.Single(wsc => wsc.BoundType == typeof(NullabilityWorksheetEntity));
             var referenceColumn = itemsConfig.Single(col => StringComparer.Ordinal.Equals("Reference", col.Member.Name));
 
-            Assert.IsFalse(referenceColumn.AllowNull, "Reference column is nullable.");
+            Assert.IsTrue(referenceColumn.Required, "Reference column is not required.");
         }
 
         [TestMethod]
-        public void Explicitly_Allow_Null_On_Value_Type()
+        public void Explicitly_Do_Not_Require_Value_Type()
         {
             var config = OpenXmlConfiguration.Workbook<NullabilityWorkbookEntity>()
                 .Worksheet(sh => sh.Items, (itemSheet, styles) =>
                 {
                     itemSheet.Column(item => item.Reference, refCol =>
                     {
-                        refCol.Nullable(true);
+                        refCol.Required(false);
                     });
                 })
                 .Create();
@@ -145,7 +145,7 @@ namespace OpenXmlImports.Tests
             var itemsConfig = config.Single(wsc => wsc.BoundType == typeof(NullabilityWorksheetEntity));
             var referenceColumn = itemsConfig.Single(col => StringComparer.Ordinal.Equals("Reference", col.Member.Name));
 
-            Assert.IsTrue(referenceColumn.AllowNull, "Reference column is not nullable.");
+            Assert.IsFalse(referenceColumn.Required, "Reference column is required.");
         }
 
         //[TestMethod]
