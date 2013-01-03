@@ -94,7 +94,7 @@ namespace OpenXmlImports.Core
 
                     if (!cellHasValue && column.Required)
                     {
-                        errorPolicy.OnNullableColumnViolation(worksheetConfig.SheetName, column.Name,
+                        errorPolicy.OnRequiredColumnViolation(worksheetConfig.SheetName, column.Name,
                             colRef, rowIndex);
                         continue;
                     }

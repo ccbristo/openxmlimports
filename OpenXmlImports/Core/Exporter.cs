@@ -79,7 +79,7 @@ namespace OpenXmlImports.Core
                     CellBinder binder = column.GetValue(item);
 
                     if (string.IsNullOrEmpty(binder.Value) && column.Required)
-                        throw new NullableColumnViolationException("Cannot export null value into non-nullable column \"{0}\" on sheet \"{1}\".",
+                        throw new RequiredColumnViolationException("Cannot export null value into non-nullable column \"{0}\" on sheet \"{1}\".",
                             column.Name, worksheetConfig.SheetName);
 
                     if (column.Member.GetPropertyOrFieldType() == typeof(string) &&

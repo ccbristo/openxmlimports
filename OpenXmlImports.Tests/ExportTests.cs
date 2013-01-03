@@ -166,7 +166,7 @@ namespace OpenXmlImports.Tests
                     Assert.Fail("Should have failed due to exporting null to required column.");
                 }
             }
-            catch (NullableColumnViolationException ex)
+            catch (RequiredColumnViolationException ex)
             {
                 Assert.AreEqual(
                     "Cannot export null value into non-nullable column \"String Field\" on sheet \"Single Table Items\".",

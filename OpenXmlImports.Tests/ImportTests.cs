@@ -95,7 +95,7 @@ namespace OpenXmlImports.Tests
 
                 Assert.Fail("Should have failed due to null in a required column.");
             }
-            catch (NullableColumnViolationException ex)
+            catch (RequiredColumnViolationException ex)
             {
                 Assert.AreEqual(
                     "Column \"A Date\" on sheet \"Item 1s\" does not allow empty values. An empty value was found in cell B2.",

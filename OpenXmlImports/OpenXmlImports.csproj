@@ -86,7 +86,7 @@
     <Compile Include="Core\MaxLengthViolationException.cs" />
     <Compile Include="Core\MissingColumnException.cs" />
     <Compile Include="Core\MissingWorksheetException.cs" />
-    <Compile Include="Core\NullableColumnViolationException.cs" />
+    <Compile Include="Core\RequiredColumnViolationException.cs" />
     <Compile Include="Core\WorksheetExtensions.cs" />
     <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="OpenXmlConfiguration.cs" />
