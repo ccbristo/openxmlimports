@@ -73,6 +73,32 @@ namespace OpenXmlImports.Tests
         }
 
         [TestMethod]
+        public void Can_Ignore_Rows_With_No_Cell_Values()
+        {
+            DateTime christmas2012 = new DateTime(2012, 12, 25, 11, 59, 30);
+            DateTime newYears2012 = new DateTime(2013, 1, 1);
+
+            var config = new WorkbookConfiguration(typeof(SingleTableHierarchy));
+            var stylesheetProvider = new DefaultStylesheetProvider();
+            var singleTableItemSheet = new WorksheetConfiguration(typeof(SingleTableItem), "Single Table", "SingleTableItems", stylesheetProvider);
+            singleTableItemSheet.SheetName = "Item 1s";
+
+            singleTableItemSheet.AddColumn("I", SingleTableHierarchyIMember);
+            var dateColumn = singleTableItemSheet.AddColumn("A Date", SingleTableHierarchyADateMember);
+            dateColumn.CellFormat = config.StylesheetProvider.DateFormat;
+            singleTableItemSheet.AddColumn("String Field", SingleTableHierarchyStringFieldMember);
+            config.AddWorksheet(singleTableItemSheet);
+
+            SingleTableHierarchy result;
+            using (var input = Assembly.GetExecutingAssembly().GetManifestResourceStream("OpenXmlImports.Tests.TestFiles.Rows_With_No_Cell_Values.xlsx"))
+                result = (SingleTableHierarchy)config.Import(input);
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.SingleTableItems, "result.SingleTableItems == null");
+            Assert.AreEqual(1, result.SingleTableItems.Count, "SingleTableItems.Count");
+        }
+
+        [TestMethod]
         public void Error_If_Null_In_A_Required_Column()
         {
             var config = new WorkbookConfiguration(typeof(SingleTableHierarchy));

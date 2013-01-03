@@ -34,7 +34,7 @@ namespace OpenXmlImports.Core
 
                 var sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
                 var headerRow = sheetData.Elements<Row>().First();
-                var dataRows = sheetData.Elements<Row>().Skip(1).ToList();
+                var dataRows = sheetData.Elements<Row>().Skip(1).Where(HasCellValues).ToList();
 
                 var columnMap = MapColumns(worksheetConfig, workbookConfiguration.ErrorPolicy,
                     headerRow, sharedStringTable);
@@ -45,6 +45,11 @@ namespace OpenXmlImports.Core
 
             workbookConfiguration.ErrorPolicy.OnImportComplete();
             return result;
+        }
+
+        private static bool HasCellValues(Row row)
+        {
+            return row.Descendants<CellValue>().Any();
         }
 
         private IDictionary<ColumnConfiguration, ColumnReference> MapColumns(WorksheetConfiguration worksheetConfig,
@@ -101,7 +106,7 @@ namespace OpenXmlImports.Core
                     else if (cellHasValue)
                     {
                         string text = cell.GetCellText(sharedStrings);
-                        
+
                         if (column.Member.GetPropertyOrFieldType() == typeof(string) &&
                             (text ?? string.Empty).Length > column.MaxLength)
                             errorPolicy.OnMaxLengthExceeded(colRef, rowIndex, column.MaxLength, column.Name);
