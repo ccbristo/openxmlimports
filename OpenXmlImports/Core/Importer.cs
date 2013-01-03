@@ -101,6 +101,12 @@ namespace OpenXmlImports.Core
                     else if (cellHasValue)
                     {
                         string text = cell.GetCellText(sharedStrings);
+                        
+                        if (column.Member.GetPropertyOrFieldType() == typeof(string) &&
+                            (text ?? string.Empty).Length > column.MaxLength)
+                            errorPolicy.OnMaxLengthExceeded(colRef, rowIndex, column.MaxLength, column.Name);
+
+
                         column.SetValue(item, text);
                     }
                 }

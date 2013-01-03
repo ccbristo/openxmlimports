@@ -174,6 +174,39 @@ namespace OpenXmlImports.Tests
             }
         }
 
+        [TestMethod]
+        public void Export_Max_Length_Exceed_Throws_Exception()
+        {
+            var config = new WorkbookConfiguration(typeof(SingleTableHierarchy));
+            var dataSource = new SingleTableHierarchy()
+            {
+                SingleTableItems = new List<SingleTableItem>()
+                {
+                    new SingleTableItem{ StringField = "This exceeds the max length of the field.", I = 1 }
+                }
+            };
+
+            var itemsSheetConfig = new WorksheetConfiguration(typeof(Item1), "Single Table Items", "SingleTableItems", config.StylesheetProvider);
+            var columnConfig = itemsSheetConfig.AddColumn("String Field", SingleTableHierarchyStringFieldMember);
+            columnConfig.MaxLength = 5;
+            config.AddWorksheet(itemsSheetConfig);
+
+            try
+            {
+                using (var output = new MemoryStream())
+                {
+                    config.Export(dataSource, output);
+                    Assert.Fail("Should have failed due to exporting a value which exceeds the max length.");
+                }
+            }
+            catch (MaxLengthViolationException ex)
+            {
+                Assert.AreEqual(
+                    "The value \"This exceeds the max length of the field.\" exceeds the max length of 5 for column \"String Field\".",
+                    ex.Message);
+            }
+        }
+
         private static void SaveToFile(MemoryStream ms, string name)
         {
             using (var fs = File.OpenWrite(name))

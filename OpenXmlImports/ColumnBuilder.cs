@@ -25,6 +25,12 @@ namespace OpenXmlImports
             return Required(true);
         }
 
+        public ColumnBuilder MaxLength(int maxLength)
+        {
+            Configuration.MaxLength = maxLength;
+            return this;
+        }
+
         public ColumnBuilder Required(bool required)
         {
             Configuration.Required = required;
@@ -71,6 +77,12 @@ namespace OpenXmlImports
         public new ColumnBuilder<TColumn> Required(bool required)
         {
             base.Required(required);
+            return this;
+        }
+
+        public new ColumnBuilder<TColumn> MaxLength(int maxLength)
+        {
+            base.MaxLength(maxLength);
             return this;
         }
 

@@ -191,6 +191,38 @@ namespace OpenXmlImports.Tests
         }
 
         [TestMethod]
+        public void Import_Max_Length_Exceeded()
+        {
+            var config = new WorkbookConfiguration(typeof(SingleTableHierarchy));
+            var stylesheetProvider = new DefaultStylesheetProvider();
+            var singleTableItemSheet = new WorksheetConfiguration(typeof(SingleTableItem), "Single Table", "SingleTableItems", stylesheetProvider);
+            singleTableItemSheet.SheetName = "Item 1s";
+
+            singleTableItemSheet.AddColumn("I", SingleTableHierarchyIMember);
+            var dateColumn = singleTableItemSheet.AddColumn("A Date", SingleTableHierarchyADateMember);
+            dateColumn.CellFormat = config.StylesheetProvider.DateFormat;
+            var stringFieldColumn = singleTableItemSheet.AddColumn("String Field", SingleTableHierarchyStringFieldMember);
+            stringFieldColumn.MaxLength = 5;
+            config.AddWorksheet(singleTableItemSheet);
+
+            try
+            {
+                SingleTableHierarchy result;
+                using (var input = Assembly.GetExecutingAssembly().GetManifestResourceStream("OpenXmlImports.Tests.TestFiles.Max_Length_Exceeded.xlsx"))
+                    result = (SingleTableHierarchy)config.Import(input);
+                Assert.Fail("Import should have failed due to max length violation.");
+            }
+            catch (MaxLengthViolationException ex)
+            {
+                Assert.AreEqual(
+                    "The value in cell C2 exceeds the max length of 5 for column \"String Field\".",
+                    ex.Message);
+            }
+
+
+        }
+
+        [TestMethod]
         public void Importer_Completes_Error_Policy()
         {
             var config = new WorkbookConfiguration(typeof(SingleTableHierarchy));

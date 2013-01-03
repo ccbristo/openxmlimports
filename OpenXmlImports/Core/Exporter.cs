@@ -82,6 +82,11 @@ namespace OpenXmlImports.Core
                         throw new NullableColumnViolationException("Cannot export null value into non-nullable column \"{0}\" on sheet \"{1}\".",
                             column.Name, worksheetConfig.SheetName);
 
+                    if (column.Member.GetPropertyOrFieldType() == typeof(string) &&
+                        !string.IsNullOrEmpty(binder.Value) && binder.Value.Length > column.MaxLength)
+                        throw new MaxLengthViolationException("The value \"{0}\" exceeds the max length of {1} for column \"{2}\".",
+                            binder.Value, column.MaxLength, column.Name);
+
                     Cell cell = new Cell()
                     {
                         CellReference = colRef,

@@ -12,5 +12,6 @@ namespace OpenXmlImports
         void OnDuplicatedColumn(string columnName);
         void OnNullableColumnViolation(string worksheetName, string columnName, ColumnReference colRef, int rowIndex);
         void OnImportComplete();
+        void OnMaxLengthExceeded(ColumnReference colRef, int rowIndex, int maxLength, string columnName);
     }
 }

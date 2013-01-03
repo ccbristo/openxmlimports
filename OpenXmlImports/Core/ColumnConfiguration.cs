@@ -10,6 +10,12 @@ namespace OpenXmlImports.Core
         public MemberInfo Member { get; set; }
         public NumberingFormat CellFormat { get; set; }
         public bool Required { get; set; }
+        public int MaxLength { get; set; }
+
+        public ColumnConfiguration()
+        {
+            MaxLength = int.MaxValue;
+        }
 
         // TODO [ccb] Implement these features.
         //public IEnumerable ValidValues { get; set; }

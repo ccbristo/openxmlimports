@@ -40,6 +40,12 @@ namespace OpenXmlImports.Core
                 columnName, worksheetName, colRef, rowIndex);
         }
 
+        public void OnMaxLengthExceeded(ColumnReference colRef, int rowIndex, int maxLength, string columnName)
+        {
+            throw new MaxLengthViolationException("The value in cell {0}{1} exceeds the max length of {2} for column \"{3}\".",
+                colRef, rowIndex, maxLength, columnName);
+        }
+
         public void OnImportComplete()
         {
             // nop

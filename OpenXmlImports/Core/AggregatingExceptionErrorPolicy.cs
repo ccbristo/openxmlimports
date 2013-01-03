@@ -46,5 +46,11 @@ namespace OpenXmlImports.Core
             mErrors.Add(string.Format("Column \"{0}\" on sheet \"{1}\" does not allow empty values. An empty value was found in cell {2}{3}.",
                 columnName, worksheetName, colRef, rowIndex));
         }
+
+        public void OnMaxLengthExceeded(ColumnReference colRef, int rowIndex, int maxLength, string columnName)
+        {
+            mErrors.Add(string.Format("The value in cell {0}{1} exceeds the max length of {2} for column \"{3}\".",
+                colRef, rowIndex, maxLength, columnName));
+        }
     }
 }
