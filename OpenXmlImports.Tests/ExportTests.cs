@@ -14,24 +14,27 @@ namespace OpenXmlImports.Tests
     [TestClass]
     public class ExporterTests
     {
-        private static readonly MemberInfo SingleTableHierarchyItem1sMember;
-        private static readonly MemberInfo SingleTableHierarchyIMember;
-        private static readonly MemberInfo SingleTableHierarchyStringFieldMember;
-        private static readonly MemberInfo SingleTableHierarchyADateMember;
-
-        static ExporterTests()
+        private static class SingleTableHierarchyMembers
         {
-            Expression<Func<SingleTableHierarchy, List<SingleTableItem>>> singleTableHierarchyItems = st => st.SingleTableItems;
-            SingleTableHierarchyItem1sMember = singleTableHierarchyItems.GetMemberInfo();
+            public static readonly MemberInfo Item1s;
+            public static readonly MemberInfo I;
+            public static readonly MemberInfo StringField;
+            public static readonly MemberInfo ADate;
 
-            Expression<Func<SingleTableItem, int>> iProperty = sti => sti.I;
-            SingleTableHierarchyIMember = iProperty.GetMemberInfo();
+            static SingleTableHierarchyMembers()
+            {
+                Expression<Func<SingleTableHierarchy, List<SingleTableItem>>> singleTableHierarchyItems = st => st.SingleTableItems;
+                Item1s = singleTableHierarchyItems.GetMemberInfo();
 
-            Expression<Func<SingleTableItem, string>> stringField = sti => sti.StringField;
-            SingleTableHierarchyStringFieldMember = stringField.GetMemberInfo();
+                Expression<Func<SingleTableItem, int>> iProperty = sti => sti.I;
+                I = iProperty.GetMemberInfo();
 
-            Expression<Func<SingleTableItem, DateTime?>> aDateProperty = sti => sti.ADate;
-            SingleTableHierarchyADateMember = aDateProperty.GetMemberInfo();
+                Expression<Func<SingleTableItem, string>> stringField = sti => sti.StringField;
+                StringField = stringField.GetMemberInfo();
+
+                Expression<Func<SingleTableItem, DateTime?>> aDateProperty = sti => sti.ADate;
+                ADate = aDateProperty.GetMemberInfo();
+            }
         }
 
         [TestMethod]
@@ -40,8 +43,6 @@ namespace OpenXmlImports.Tests
             var config = new WorkbookConfiguration(typeof(SimpleHierarchy));
             var dataSource = new SimpleHierarchy()
             {
-                I = 1,
-                S = "A String!",
                 Item1s = new List<Item1>(),
                 Item2s = new List<Item2>()
             };
@@ -55,21 +56,17 @@ namespace OpenXmlImports.Tests
             using (var output = new MemoryStream())
             {
                 config.Export(dataSource, output);
+
                 var document = SpreadsheetDocument.Open(output, false);
 
                 var sheets = document.WorkbookPart.Workbook.Sheets;
 
-                Assert.AreEqual(2, sheets.Count());
+                var sheetNames = sheets.ChildElements.Select(sheet => sheet.GetAttribute("name", null).Value)
+                    .ToList();
 
-                var firstSheet = sheets.ChildElements[0];
-                var firstSheetNameAttrib = firstSheet.GetAttribute("name", null);
-                Assert.IsNotNull(firstSheetNameAttrib);
-                Assert.AreEqual("Item 1s", firstSheetNameAttrib.Value);
-
-                var secondSheet = sheets.ChildElements[1];
-                var secondSheetNameAttrib = secondSheet.GetAttribute("name", null);
-                Assert.IsNotNull(secondSheetNameAttrib);
-                Assert.AreEqual("Item 2s", secondSheetNameAttrib.Value);
+                CollectionAssert.AreEqual(
+                    new[] { "Item 1s", "Item 2s" },
+                    sheetNames);
             }
         }
 
@@ -96,10 +93,10 @@ namespace OpenXmlImports.Tests
 
             var singleTableItemSheet = new WorksheetConfiguration(typeof(SingleTableItem), "Single Table", "SingleTableItems", config.StylesheetProvider);
             singleTableItemSheet.SheetName = "Item 1s";
-            singleTableItemSheet.AddColumn("I", SingleTableHierarchyIMember);
-            var dateColumn = singleTableItemSheet.AddColumn("A Date", SingleTableHierarchyADateMember);
+            singleTableItemSheet.AddColumn("I", SingleTableHierarchyMembers.I);
+            var dateColumn = singleTableItemSheet.AddColumn("A Date", SingleTableHierarchyMembers.ADate);
             dateColumn.CellFormat = config.StylesheetProvider.DateFormat;
-            singleTableItemSheet.AddColumn("String Field", SingleTableHierarchyStringFieldMember);
+            singleTableItemSheet.AddColumn("String Field", SingleTableHierarchyMembers.StringField);
             config.AddWorksheet(singleTableItemSheet);
 
             using (var output = new MemoryStream())
@@ -154,7 +151,7 @@ namespace OpenXmlImports.Tests
             };
 
             var itemsSheetConfig = new WorksheetConfiguration(typeof(Item1), "Single Table Items", "SingleTableItems", config.StylesheetProvider);
-            var columnConfig = itemsSheetConfig.AddColumn("String Field", SingleTableHierarchyStringFieldMember);
+            var columnConfig = itemsSheetConfig.AddColumn("String Field", SingleTableHierarchyMembers.StringField);
             columnConfig.Required = true;
             config.AddWorksheet(itemsSheetConfig);
 
@@ -187,7 +184,7 @@ namespace OpenXmlImports.Tests
             };
 
             var itemsSheetConfig = new WorksheetConfiguration(typeof(Item1), "Single Table Items", "SingleTableItems", config.StylesheetProvider);
-            var columnConfig = itemsSheetConfig.AddColumn("String Field", SingleTableHierarchyStringFieldMember);
+            var columnConfig = itemsSheetConfig.AddColumn("String Field", SingleTableHierarchyMembers.StringField);
             columnConfig.MaxLength = 5;
             config.AddWorksheet(itemsSheetConfig);
 
@@ -204,6 +201,59 @@ namespace OpenXmlImports.Tests
                 Assert.AreEqual(
                     "The value \"This exceeds the max length of the field.\" exceeds the max length of 5 for column \"String Field\".",
                     ex.Message);
+            }
+        }
+
+        [TestMethod]
+        public void Can_Export_Singletons_And_Root_Properties()
+        {
+            var config = new WorkbookConfiguration(typeof(RootPropertiesHierarchy));
+
+            var detailsSheet = new WorksheetConfiguration(typeof(RootPropertiesHierarchy), "Details", null, config.StylesheetProvider);
+            detailsSheet.AddColumn("Data", RootPropertiesHierarchyMembers.Data);
+            detailsSheet.AddColumn("I", RootPropertiesHierarchyMembers.I);
+            config.AddWorksheet(detailsSheet);
+
+            var itemSheet = new WorksheetConfiguration(typeof(Item), "Single Item", "SingleItem", config.StylesheetProvider);
+            itemSheet.AddColumn("J", RootPropertiesHierarchyMembers.SingleItemMembers.J);
+            itemSheet.AddColumn("S", RootPropertiesHierarchyMembers.SingleItemMembers.S);
+            config.AddWorksheet(itemSheet);
+
+            var dataSource = new RootPropertiesHierarchy
+            {
+                Data = "Some data.",
+                I = 5,
+                SingleItem = new Item { J = 10, S = "Single item data." }
+            };
+
+            using (var output = new MemoryStream())
+            {
+                config.Export(dataSource, output);
+
+                var document = SpreadsheetDocument.Open(output, false);
+                var sharedStringTable = document.WorkbookPart.SharedStringTablePart.SharedStringTable;
+                var sheets = document.WorkbookPart.Workbook.Sheets;
+
+                var sheetNames = sheets.ChildElements.Select(sheet => sheet.GetAttribute("name", null).Value)
+                    .ToList();
+
+                CollectionAssert.AreEqual(
+                    new[] { "Details", "Single Item" },
+                    sheetNames);
+
+                var worksheets = document.WorkbookPart.WorksheetParts
+                    .Select(wsp => wsp.Worksheet)
+                    .ToList();
+
+                var detailsSheetElem = worksheets[0];
+                var details_rows = detailsSheetElem.Elements<SheetData>().Single().Elements<Row>().ToList();
+                Assert.AreEqual(2, details_rows.Count);
+                Assert.IsTrue(details_rows.All(r => r.Elements<Cell>().Count() == 2));
+
+                var singleItemSheetElem = worksheets[1];
+                var singleItem_rows = singleItemSheetElem.Elements<SheetData>().Single().Elements<Row>().ToList();
+                Assert.AreEqual(2, singleItem_rows.Count);
+                Assert.IsTrue(singleItem_rows.All(r => r.Elements<Cell>().Count() == 2));
             }
         }
 

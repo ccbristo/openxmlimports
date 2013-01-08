@@ -12,6 +12,8 @@ namespace OpenXmlImports.Core
         {
             var document = SpreadsheetDocument.Create(output, SpreadsheetDocumentType.Workbook);
             var workbookPart = document.AddWorkbookPart();
+            var sharedStringTablePart = document.WorkbookPart.AddNewPart<SharedStringTablePart>();
+            sharedStringTablePart.SharedStringTable = new SharedStringTable();
             workbookPart.Workbook = new Workbook();
 
             var stylesPart = workbookPart.AddNewPart<WorkbookStylesPart>();
@@ -29,8 +31,12 @@ namespace OpenXmlImports.Core
                 var headerRow = CreateHeaderRow(worksheetConfig, sheetData);
                 sheetData.Append(headerRow);
 
-                IList boundMember = workbookConfig.GetListFor(worksheetConfig, workbookSource);
-                ExportData(boundMember, worksheetConfig, sheetData, workbookConfig.StylesheetProvider);
+                object source = workbookConfig.GetMemberFor(worksheetConfig, workbookSource);
+
+                if (source is IList)
+                    ExportList((IList)source, worksheetConfig, sheetData, workbookConfig.StylesheetProvider);
+                else
+                    ExportItem(source, worksheetConfig, sheetData, workbookConfig.StylesheetProvider);
 
                 sheets.Append(sheet);
                 sheetId++;
@@ -61,47 +67,53 @@ namespace OpenXmlImports.Core
             return row;
         }
 
-        private void ExportData(IList list, WorksheetConfiguration worksheetConfig, SheetData sheetData,
+        private void ExportList(IList list, WorksheetConfiguration worksheetConfig, SheetData sheetData,
             IStylesheetProvider stylesheet)
         {
             foreach (object item in list)
             {
-                Row row = new Row();
-                ColumnReference colRef = "A";
-
-                foreach (var column in worksheetConfig)
-                {
-                    // TODO [ccb] Stronger type binding would be good here.
-                    // Ex: column.Type.GetValue -> Type would be an NH style IType
-                    // Would need to return something that included the value and the
-                    // CellValues enum for excel formatting/"typing".
-
-                    CellBinder binder = column.GetValue(item);
-
-                    if (string.IsNullOrEmpty(binder.Value) && column.Required)
-                        throw new RequiredColumnViolationException("Cannot export null value into non-nullable column \"{0}\" on sheet \"{1}\".",
-                            column.Name, worksheetConfig.SheetName);
-
-                    if (column.Member.GetPropertyOrFieldType() == typeof(string) &&
-                        !string.IsNullOrEmpty(binder.Value) && binder.Value.Length > column.MaxLength)
-                        throw new MaxLengthViolationException("The value \"{0}\" exceeds the max length of {1} for column \"{2}\".",
-                            binder.Value, column.MaxLength, column.Name);
-
-                    Cell cell = new Cell()
-                    {
-                        CellReference = colRef,
-                        CellValue = new CellValue(binder.Value),
-                        DataType = new EnumValue<CellValues>(binder.CellType),
-                        StyleIndex = stylesheet.GetStyleIndex(column.CellFormat)
-                    };
-
-                    row.Append(cell);
-
-                    colRef++;
-                }
-
-                sheetData.Append(row);
+                ExportItem(item, worksheetConfig, sheetData, stylesheet);
             }
+        }
+
+        private void ExportItem(object source, WorksheetConfiguration worksheetConfig,
+            SheetData sheetData, IStylesheetProvider stylesheet)
+        {
+            Row row = new Row();
+            ColumnReference colRef = "A";
+
+            foreach (var column in worksheetConfig)
+            {
+                // TODO [ccb] Stronger type binding would be good here.
+                // Ex: column.Type.GetValue -> Type would be an NH style IType
+                // Would need to return something that included the value and the
+                // CellValues enum for excel formatting/"typing".
+
+                CellBinder binder = column.GetValue(source);
+
+                if (string.IsNullOrEmpty(binder.Value) && column.Required)
+                    throw new RequiredColumnViolationException("Cannot export null value into non-nullable column \"{0}\" on sheet \"{1}\".",
+                        column.Name, worksheetConfig.SheetName);
+
+                if (column.Member.GetMemberType() == typeof(string) &&
+                    !string.IsNullOrEmpty(binder.Value) && binder.Value.Length > column.MaxLength)
+                    throw new MaxLengthViolationException("The value \"{0}\" exceeds the max length of {1} for column \"{2}\".",
+                        binder.Value, column.MaxLength, column.Name);
+
+                Cell cell = new Cell()
+                {
+                    CellReference = colRef,
+                    CellValue = new CellValue(binder.Value),
+                    DataType = new EnumValue<CellValues>(binder.CellType),
+                    StyleIndex = stylesheet.GetStyleIndex(column.CellFormat)
+                };
+
+                row.Append(cell);
+
+                colRef++;
+            }
+
+            sheetData.Append(row);
         }
 
         private static Sheet AddSheet(WorkbookPart workbookPart,

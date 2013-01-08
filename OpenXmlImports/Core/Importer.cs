@@ -17,7 +17,7 @@ namespace OpenXmlImports.Core
         {
             object result = Create(workbookConfiguration.BoundType);
             var document = CreateDocument(input, workbookConfiguration.ErrorPolicy);
-
+            var sharedStringTable = document.WorkbookPart.SharedStringTablePart.SharedStringTable;
             var sheets = document.WorkbookPart.Workbook.Sheets;
 
             // TODO [ccb] Add tests for import only sheets
@@ -25,22 +25,36 @@ namespace OpenXmlImports.Core
             {
                 var sheet = worksheetConfig.GetWorksheet(sheets, workbookConfiguration.ErrorPolicy);
                 var worksheetMember = workbookConfiguration.GetMemberInfoFor(worksheetConfig);
-                var list = (IList)Create(worksheetMember.GetPropertyOrFieldType());
-                worksheetMember.SetPropertyOrFieldValue(result, list);
 
                 var worksheetPart = (WorksheetPart)document.WorkbookPart.GetPartById(sheet.Id);
-
-                var sharedStringTable = document.WorkbookPart.SharedStringTablePart.SharedStringTable;
-
                 var sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
                 var headerRow = sheetData.Elements<Row>().First();
-                var dataRows = sheetData.Elements<Row>().Skip(1).Where(HasCellValues).ToList();
 
                 var columnMap = MapColumns(worksheetConfig, workbookConfiguration.ErrorPolicy,
                     headerRow, sharedStringTable);
-                AddWorksheetItems(dataRows, list, worksheetConfig,
-                    columnMap, sharedStringTable, workbookConfiguration.ErrorPolicy);
+                var dataRows = sheetData.Elements<Row>().Skip(1).Where(HasCellValues).ToList();
 
+                var memberType = worksheetMember.GetMemberType();
+
+                if (memberType.ClosesInterface(typeof(IList<>)))
+                {
+                    var list = (IList)Create(memberType);
+                    worksheetMember.SetPropertyOrFieldValue(result, list);
+                    AddWorksheetItems(dataRows, list, worksheetConfig,
+                        columnMap, sharedStringTable, workbookConfiguration.ErrorPolicy);
+                }
+                else if (string.IsNullOrEmpty(worksheetConfig.MemberName) && dataRows.Count == 1)
+                {
+                    ImportItem(result, worksheetConfig, columnMap, sharedStringTable,
+                        workbookConfiguration.ErrorPolicy, 2, dataRows[0]);
+                }
+                else
+                {
+                    var target = Create(memberType);
+                    ImportItem(target, worksheetConfig, columnMap, sharedStringTable,
+                        workbookConfiguration.ErrorPolicy, 2, dataRows[0]);
+                    worksheetMember.SetPropertyOrFieldValue(result, target);
+                }
             }
 
             workbookConfiguration.ErrorPolicy.OnImportComplete();
@@ -82,42 +96,48 @@ namespace OpenXmlImports.Core
             SharedStringTable sharedStrings,
             IErrorPolicy errorPolicy)
         {
-            int rowIndex = 2; // data starts on row 2
+            int rowIndex = 2; // TODO [ccb] elimine this. Can use Row.RowIndex property
 
             foreach (var row in dataRows)
             {
                 var item = Create(worksheetConfig.BoundType);
-
-                // only pay attention to columns configured in.
-                // ignore any extra columns in the sheet.
-                foreach (var column in worksheetConfig.Columns)
-                {
-                    var colRef = columnMap[column];
-                    var cell = row.Elements<Cell>().SingleOrDefault(c => c.CellReference.Column() == colRef);
-
-                    bool cellHasValue = cell != null && cell.CellValue != null;
-
-                    if (!cellHasValue && column.Required)
-                    {
-                        errorPolicy.OnRequiredColumnViolation(worksheetConfig.SheetName, column.Name,
-                            colRef, rowIndex);
-                        continue;
-                    }
-                    else if (cellHasValue)
-                    {
-                        string text = cell.GetCellText(sharedStrings);
-
-                        if (column.Member.GetPropertyOrFieldType() == typeof(string) &&
-                            (text ?? string.Empty).Length > column.MaxLength)
-                            errorPolicy.OnMaxLengthExceeded(colRef, rowIndex, column.MaxLength, column.Name);
-
-
-                        column.SetValue(item, text);
-                    }
-                }
-
-                rowIndex++;
+                ImportItem(item, worksheetConfig, columnMap, sharedStrings, errorPolicy, rowIndex, row);
                 list.Add(item);
+                rowIndex++;
+            }
+        }
+
+        private static void ImportItem(
+            object target, WorksheetConfiguration worksheetConfig,
+            IDictionary<ColumnConfiguration, ColumnReference> columnMap,
+            SharedStringTable sharedStrings, IErrorPolicy errorPolicy, int rowIndex, Row row)
+        {
+            // only pay attention to columns configured in.
+            // ignore any extra columns in the sheet.
+            foreach (var column in worksheetConfig.Columns)
+            {
+                var colRef = columnMap[column];
+                var cell = row.Elements<Cell>().SingleOrDefault(c => c.CellReference.Column() == colRef);
+
+                bool cellHasValue = cell != null && cell.CellValue != null;
+
+                if (!cellHasValue && column.Required)
+                {
+                    errorPolicy.OnRequiredColumnViolation(worksheetConfig.SheetName, column.Name,
+                        colRef, rowIndex);
+                    continue;
+                }
+                else if (cellHasValue)
+                {
+                    string text = cell.GetCellText(sharedStrings);
+
+                    if (column.Member.GetMemberType() == typeof(string) &&
+                        (text ?? string.Empty).Length > column.MaxLength)
+                        errorPolicy.OnMaxLengthExceeded(colRef, rowIndex, column.MaxLength, column.Name);
+
+
+                    column.SetValue(target, text);
+                }
             }
         }
 

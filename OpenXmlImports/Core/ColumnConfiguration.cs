@@ -24,7 +24,7 @@ namespace OpenXmlImports.Core
 
         internal void SetValue(object item, string text)
         {
-            object value = Conversion.OpenXmlConvert(text, Member.GetPropertyOrFieldType());
+            object value = Conversion.OpenXmlConvert(text, Member.GetMemberType());
             Member.SetPropertyOrFieldValue(item, value);
         }
 
@@ -48,7 +48,7 @@ namespace OpenXmlImports.Core
         // TODO [ccb] This should be part of a stronger Type binding model
         private CellValues InferCellType(MemberInfo member)
         {
-            var memberType = member.GetPropertyOrFieldType();
+            var memberType = member.GetMemberType();
 
             if (memberType.IsNullable())
                 memberType = Nullable.GetUnderlyingType(memberType);
@@ -68,7 +68,7 @@ namespace OpenXmlImports.Core
                 return CellValues.Number;
 
             throw new ArgumentOutOfRangeException("member", string.Format("Could not determine cell type for {0}",
-                member.GetType().Name));
+                member.Name));
         }
     }
 }

@@ -278,6 +278,35 @@ namespace OpenXmlImports.Tests
             }
         }
 
+        [TestMethod]
+        public void Import_Root_Properties_And_Fields()
+        {
+            var config = new WorkbookConfiguration(typeof(RootPropertiesHierarchy));
+
+            var detailsSheet = new WorksheetConfiguration(typeof(RootPropertiesHierarchy), "Details", null, config.StylesheetProvider);
+            detailsSheet.AddColumn("I", RootPropertiesHierarchyMembers.I);
+            detailsSheet.AddColumn("Data", RootPropertiesHierarchyMembers.Data);
+            config.AddWorksheet(detailsSheet);
+
+            var singleItemSheet = new WorksheetConfiguration(typeof(Item), "Item",
+                RootPropertiesHierarchyMembers.SingleItem.Name, config.StylesheetProvider);
+            singleItemSheet.AddColumn("J", RootPropertiesHierarchyMembers.SingleItemMembers.J);
+            singleItemSheet.AddColumn("S", RootPropertiesHierarchyMembers.SingleItemMembers.S);
+            config.AddWorksheet(singleItemSheet);
+
+            RootPropertiesHierarchy h;
+
+
+            using (var input = Assembly.GetExecutingAssembly().GetManifestResourceStream("OpenXmlImports.Tests.TestFiles.Import_Root_Properties_And_Fields.xlsx"))
+                h = (RootPropertiesHierarchy)config.Import(input);
+
+            Assert.AreEqual(1, h.I, "I");
+            Assert.AreEqual("Some data", h.Data, "Data");
+
+            Assert.AreEqual(2, h.SingleItem.J, "h.SingleItem.J");
+            Assert.AreEqual("S value", h.SingleItem.S, "h.SingleItem.S");
+        }
+
         private static MemberInfo GetMember<T, TResult>(Expression<Func<T, TResult>> exp)
         {
             return exp.GetMemberInfo();

@@ -1,19 +1,17 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 
 namespace OpenXmlImports.Core
 {
-    public class WorkbookConfiguration : IEnumerable<WorksheetConfiguration>
+    public class WorkbookConfiguration
     {
         public string Name { get; set; }
         public Type BoundType { get; private set; }
         public IErrorPolicy ErrorPolicy { get; set; }
         public IStylesheetProvider StylesheetProvider { get; set; }
-        private readonly List<WorksheetConfiguration> Worksheets = new List<WorksheetConfiguration>();
+        private readonly Dictionary<object, WorksheetConfiguration> mWorksheets = new Dictionary<object, WorksheetConfiguration>();
 
         public WorkbookConfiguration(Type boundType)
         {
@@ -24,16 +22,28 @@ namespace OpenXmlImports.Core
 
         public void AddWorksheet(WorksheetConfiguration worksheet)
         {
-            this.Worksheets.Add(worksheet);
+            mWorksheets[worksheet.SheetName] = worksheet;
         }
 
         public WorksheetConfiguration GetWorksheet(string name)
         {
-            return Worksheets.SingleOrDefault(c => StringComparer.OrdinalIgnoreCase.Equals(name, c.SheetName));
+            WorksheetConfiguration config;
+            mWorksheets.TryGetValue(name, out config);
+            return config;
+        }
+
+        public WorksheetConfiguration GetWorksheet(MemberInfo member)
+        {
+            WorksheetConfiguration config;
+            mWorksheets.TryGetValue(member, out config);
+            return config;
         }
 
         internal MemberInfo GetMemberInfoFor(WorksheetConfiguration worksheet)
         {
+            if (string.IsNullOrEmpty(worksheet.MemberName))
+                return BoundType;
+
             var memberInfos = BoundType.GetMember(worksheet.MemberName, BindingFlags.Public | BindingFlags.Instance);
 
             if (memberInfos.Length == 0)
@@ -46,16 +56,14 @@ namespace OpenXmlImports.Core
             return memberInfos[0];
         }
 
-        internal IList GetListFor(WorksheetConfiguration worksheetConfig, object workbookSource)
+        internal object GetMemberFor(WorksheetConfiguration worksheetConfig, object workbookSource)
         {
+            if (string.IsNullOrEmpty(worksheetConfig.MemberName))
+                return workbookSource;
+
             var memberInfo = GetMemberInfoFor(worksheetConfig);
             object value = memberInfo.GetPropertyOrFieldValue(workbookSource);
-
-            if (!(value is IList))
-                // TODO [ccb] Improve this message
-                throw new InvalidOperationException("Worksheet source is not an IList");
-
-            return (IList)value;
+            return value;
         }
 
         public void Export(object workbookSource, Stream output)
@@ -70,14 +78,14 @@ namespace OpenXmlImports.Core
             return importer.Import(this, input);
         }
 
-        public IEnumerator<WorksheetConfiguration> GetEnumerator()
+        public IEnumerable<WorksheetConfiguration> Worksheets
         {
-            return Worksheets.GetEnumerator();
+            get { return mWorksheets.Values; }
         }
 
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        public IEnumerator<WorksheetConfiguration> GetEnumerator()
         {
-            return Worksheets.GetEnumerator();
+            return mWorksheets.Values.GetEnumerator();
         }
     }
 }

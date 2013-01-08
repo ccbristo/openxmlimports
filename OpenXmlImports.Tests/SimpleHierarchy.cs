@@ -5,9 +5,6 @@ namespace OpenXmlImports.Tests
 {
     public class SimpleHierarchy
     {
-        public int I { get; set; }
-        public string S { get; set; }
-
         public List<Item1> Item1s;
         public List<Item2> Item2s;
     }

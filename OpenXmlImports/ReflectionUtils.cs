@@ -44,16 +44,19 @@ namespace OpenXmlImports
                 memberInfo.MemberType == MemberTypes.Property;
         }
 
-        public static Type GetPropertyOrFieldType(this MemberInfo memberInfo)
+        public static Type GetMemberType(this MemberInfo memberInfo)
         {
             FieldInfo fieldInfo;
-            PropertyInfo propertyInfo;
-
             if ((fieldInfo = memberInfo as FieldInfo) != null)
                 return fieldInfo.FieldType;
 
+            PropertyInfo propertyInfo;
             if ((propertyInfo = memberInfo as PropertyInfo) != null)
                 return propertyInfo.PropertyType;
+
+            Type type;
+            if ((type = memberInfo as Type) != null)
+                return type;
 
             throw new InvalidOperationException(string.Format("{0}.{1} is not a property or field.",
                 memberInfo.DeclaringType.Name, memberInfo.Name));
@@ -91,6 +94,16 @@ namespace OpenXmlImports
         public static bool IsNullable(this Type type)
         {
             return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
+        }
+
+        public static bool IsTerminal(this Type type)
+        {
+            if (type.IsNullable())
+                type = Nullable.GetUnderlyingType(type);
+
+            return type.IsPrimitive ||
+                type.In(typeof(string), typeof(decimal), typeof(DateTime));
+
         }
     }
 }

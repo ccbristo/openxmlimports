@@ -26,24 +26,24 @@ namespace OpenXmlImports.Tests
             var config = OpenXmlConfiguration.Workbook<SimpleHierarchy>()
                 .Create();
 
-            Assert.AreEqual(2, config.Count(), "number of worksheet configs");
+            Assert.AreEqual(2, config.Worksheets.Count(), "number of worksheet configs");
 
-            var item1Config = config.Single(wsc => wsc.BoundType == typeof(Item1));
+            var item1Config = config.Worksheets.Single(wsc => wsc.BoundType == typeof(Item1));
             Assert.AreEqual(2, item1Config.Columns.Count());
 
-            var item1NameColumn = item1Config.Single(column => StringComparer.Ordinal.Equals(column.Name, "Name"));
+            var item1NameColumn = item1Config.Columns.Single(column => StringComparer.Ordinal.Equals(column.Name, "Name"));
             Assert.AreEqual("Name", item1NameColumn.Member.Name);
 
-            var item1ValueColumn = item1Config.Single(column => StringComparer.Ordinal.Equals(column.Name, "Value"));
+            var item1ValueColumn = item1Config.Columns.Single(column => StringComparer.Ordinal.Equals(column.Name, "Value"));
             Assert.AreEqual(item1ValueColumn.Member.Name, "Value");
 
-            var item2Config = config.Single(wsc => wsc.BoundType == typeof(Item2));
+            var item2Config = config.Worksheets.Single(wsc => wsc.BoundType == typeof(Item2));
             Assert.AreEqual(2, item2Config.Columns.Count());
 
-            var item2TitleColumn = item2Config.Single(column => StringComparer.Ordinal.Equals(column.Name, "Title"));
+            var item2TitleColumn = item2Config.Columns.Single(column => StringComparer.Ordinal.Equals(column.Name, "Title"));
             Assert.AreEqual(item2TitleColumn.Member.Name, "Title");
 
-            var item2ADateColumn = item2Config.Single(column => StringComparer.Ordinal.Equals(column.Name, "A Date"));
+            var item2ADateColumn = item2Config.Columns.Single(column => StringComparer.Ordinal.Equals(column.Name, "A Date"));
             Assert.AreEqual(item2ADateColumn.Member.Name, "ADate");
         }
 
@@ -51,15 +51,15 @@ namespace OpenXmlImports.Tests
         public void Override_Sheet_Name()
         {
             var config = OpenXmlConfiguration.Workbook<SimpleHierarchy>()
-                .Worksheet(sh => sh.Item1s, (item1Sheet, styles) =>
+                .List(sh => sh.Item1s, (item1Sheet, styles) =>
                     {
                         item1Sheet.Named("The Item1s");
                     })
                 .Create();
 
-            Assert.AreEqual(2, config.Count(), "number of worksheet configs");
+            Assert.AreEqual(2, config.Worksheets.Count(), "number of worksheet configs");
 
-            var item1Config = config.Single(wsc => wsc.BoundType == typeof(Item1));
+            var item1Config = config.Worksheets.Single(wsc => wsc.BoundType == typeof(Item1));
             Assert.AreEqual("The Item1s", item1Config.SheetName);
         }
 
@@ -67,7 +67,7 @@ namespace OpenXmlImports.Tests
         public void Override_Column_Name()
         {
             var config = OpenXmlConfiguration.Workbook<SimpleHierarchy>()
-                .Worksheet(sh => sh.Item1s, (item1Sheet, styles) =>
+                .List(sh => sh.Item1s, (item1Sheet, styles) =>
                 {
                     item1Sheet.Column(item => item.Name, nameCol =>
                     {
@@ -77,10 +77,10 @@ namespace OpenXmlImports.Tests
                 })
                 .Create();
 
-            Assert.AreEqual(2, config.Count(), "number of worksheet configs");
+            Assert.AreEqual(2, config.Worksheets.Count(), "number of worksheet configs");
 
-            var item1Config = config.Single(wsc => wsc.BoundType == typeof(Item1));
-            var nameColumn = item1Config.Single(col => StringComparer.Ordinal.Equals("Name", col.Member.Name));
+            var item1Config = config.Worksheets.Single(wsc => wsc.BoundType == typeof(Item1));
+            var nameColumn = item1Config.Columns.Single(col => StringComparer.Ordinal.Equals("Name", col.Member.Name));
             Assert.AreEqual("The Name Column", nameColumn.Name);
 
             Assert.AreEqual(2, item1Config.Columns.Count(), "number of columns");
@@ -92,8 +92,8 @@ namespace OpenXmlImports.Tests
             var config = OpenXmlConfiguration.Workbook<NullabilityWorkbookEntity>()
                 .Create();
 
-            var sheetConfig = config.Single(wsc => wsc.BoundType == typeof(NullabilityWorksheetEntity));
-            var referenceColumn = sheetConfig.Single(col => StringComparer.Ordinal.Equals("Reference", col.Member.Name));
+            var sheetConfig = config.Worksheets.Single(wsc => wsc.BoundType == typeof(NullabilityWorksheetEntity));
+            var referenceColumn = sheetConfig.Columns.Single(col => StringComparer.Ordinal.Equals("Reference", col.Member.Name));
 
             Assert.IsFalse(referenceColumn.Required, "Reference column is required.");
         }
@@ -104,8 +104,8 @@ namespace OpenXmlImports.Tests
             var config = OpenXmlConfiguration.Workbook<NullabilityWorkbookEntity>()
                 .Create();
 
-            var sheetConfig = config.Single(wsc => wsc.BoundType == typeof(NullabilityWorksheetEntity));
-            var valueColumn = sheetConfig.Single(col => StringComparer.Ordinal.Equals("Value", col.Member.Name));
+            var sheetConfig = config.Worksheets.Single(wsc => wsc.BoundType == typeof(NullabilityWorksheetEntity));
+            var valueColumn = sheetConfig.Columns.Single(col => StringComparer.Ordinal.Equals("Value", col.Member.Name));
 
             Assert.IsTrue(valueColumn.Required, "Value column is not required.");
         }
@@ -114,7 +114,7 @@ namespace OpenXmlImports.Tests
         public void Explicitly_Require_Reference_Type()
         {
             var config = OpenXmlConfiguration.Workbook<NullabilityWorkbookEntity>()
-                .Worksheet(sh => sh.Items, (itemSheet, styles) =>
+                .List(sh => sh.Items, (itemSheet, styles) =>
                 {
                     itemSheet.Column(item => item.Reference, refCol =>
                     {
@@ -123,8 +123,8 @@ namespace OpenXmlImports.Tests
                 })
                 .Create();
 
-            var itemsConfig = config.Single(wsc => wsc.BoundType == typeof(NullabilityWorksheetEntity));
-            var referenceColumn = itemsConfig.Single(col => StringComparer.Ordinal.Equals("Reference", col.Member.Name));
+            var itemsConfig = config.Worksheets.Single(wsc => wsc.BoundType == typeof(NullabilityWorksheetEntity));
+            var referenceColumn = itemsConfig.Columns.Single(col => StringComparer.Ordinal.Equals("Reference", col.Member.Name));
 
             Assert.IsTrue(referenceColumn.Required, "Reference column is not required.");
         }
@@ -133,7 +133,7 @@ namespace OpenXmlImports.Tests
         public void Explicitly_Do_Not_Require_Value_Type()
         {
             var config = OpenXmlConfiguration.Workbook<NullabilityWorkbookEntity>()
-                .Worksheet(sh => sh.Items, (itemSheet, styles) =>
+                .List(sh => sh.Items, (itemSheet, styles) =>
                 {
                     itemSheet.Column(item => item.Reference, refCol =>
                     {
@@ -142,10 +142,70 @@ namespace OpenXmlImports.Tests
                 })
                 .Create();
 
-            var itemsConfig = config.Single(wsc => wsc.BoundType == typeof(NullabilityWorksheetEntity));
-            var referenceColumn = itemsConfig.Single(col => StringComparer.Ordinal.Equals("Reference", col.Member.Name));
+            var itemsConfig = config.Worksheets.Single(wsc => wsc.BoundType == typeof(NullabilityWorksheetEntity));
+            var referenceColumn = itemsConfig.Columns.Single(col => StringComparer.Ordinal.Equals("Reference", col.Member.Name));
 
             Assert.IsFalse(referenceColumn.Required, "Reference column is required.");
+        }
+
+        [TestMethod]
+        public void Root_Properties_And_Singletons_Are_Inferred()
+        {
+            var config = OpenXmlConfiguration.Workbook<RootPropertiesHierarchy>()
+                .Create();
+
+            RootPropertiesHierarchy hierarchy = new RootPropertiesHierarchy
+                {
+                    Data = "Some data.",
+                    I = 3,
+                    SingleItem = new Item { J = 4, S = "S" }
+                };
+
+            var detailsSheet = config.GetWorksheet("Details");
+
+            Assert.AreEqual(2, detailsSheet.Columns.Count());
+            Assert.AreEqual(2, config.Worksheets.Count(), "Should be 2 sheets in config.");
+        }
+
+        [TestMethod]
+        public void Explicitly_Configure_Root_Properties()
+        {
+            var config = OpenXmlConfiguration.Workbook<RootPropertiesHierarchy>()
+                .Singleton(rph => rph.SingleItem, (sheet, style) =>
+                    {
+                        sheet
+                            .Named("Single Item Sheet")
+                            .Column(item => item.J, jColumn =>
+                            {
+                                jColumn.Named("J Column");
+                            });
+                    })
+                .RootProperties((sheet, style) =>
+                    {
+                        sheet.Named("Details Sheet")
+                            .Column(rhp => rhp.Data, dataColumn =>
+                            {
+                                dataColumn.Named("Data Column");
+                            });
+                    }
+                )
+                .Create();
+
+            Assert.AreEqual(2, config.Worksheets.Count(), "Worksheet count");
+
+            var detailsSheet = config.Worksheets.SingleOrDefault(ws => ws.SheetName.Equals("Details Sheet"));
+            Assert.IsNotNull(detailsSheet);
+
+            Assert.AreEqual(2, detailsSheet.Columns.Count(), "detailsSheet.Columns.Count()");
+            var dataCol = detailsSheet.Columns.SingleOrDefault(c => c.Name.Equals("Data Column"));
+            Assert.IsNotNull(dataCol);
+
+            var singleItemSheet = config.Worksheets.SingleOrDefault(ws => ws.SheetName.Equals("Single Item Sheet"));
+            Assert.IsNotNull(singleItemSheet);
+
+            Assert.AreEqual(2, singleItemSheet.Columns.Count(), "singleItemSheet.Columns.Count()");
+            var jCol = singleItemSheet.Columns.SingleOrDefault(c => c.Name.Equals("J Column"));
+            Assert.IsNotNull(jCol);
         }
 
         //[TestMethod]
@@ -155,7 +215,7 @@ namespace OpenXmlImports.Tests
 
             OpenXmlConfiguration.Workbook<PropertyRateSet>()
                 .Worksheet("Instructions", instructionsSheet => instructionsSheet.ExportOnly())
-                .Worksheet(prs => prs.StateGroups, (stateGroupSheet, styles) =>
+                .List(prs => prs.StateGroups, (stateGroupSheet, styles) =>
                     {
                         stateGroupSheet
                             .Column(sga => sga.State, columnConfig =>

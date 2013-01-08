@@ -76,6 +76,7 @@
     <Compile Include="ImportTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyRateSet.cs" />
+    <Compile Include="RootPropertiesHierarchy.cs" />
     <Compile Include="SimpleHierarchy.cs" />
     <Compile Include="SingleTableHierarchy.cs" />
     <Compile Include="WorkbookConfigurationTests.cs" />
@@ -131,6 +132,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="TestFiles\Rows_With_No_Cell_Values.xlsx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestFiles\Import_Root_Properties_And_Fields.xlsx" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

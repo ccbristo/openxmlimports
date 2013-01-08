@@ -20,21 +20,35 @@ namespace OpenXmlImports
 
         public WorkbookConfiguration Create()
         {
-            // TODO [ccb] Do we need a way to differentiate entity types from non-entity types ala NH?
-            // Need to differentiate things that will be tables from other properties...
-            // Ex:
-            // class X{ Something SingleItemProperty; IList<Item> Items { get; set; } }
-            // Should pay attention Items and SingleItemProperty.
+            var bindingFlags = BindingFlags.Public | BindingFlags.Instance;
 
-            var workbookMembers = typeof(TWorkbook).GetMembers(BindingFlags.Public | BindingFlags.Instance)
-                .Where(m => m.IsPropertyOrField() &&
-                            m.GetPropertyOrFieldType().ClosesInterface(typeof(IList<>)));
+            var rootProperties = typeof(TWorkbook).GetMembers(bindingFlags)
+                .Where(m => m.IsPropertyOrField() && m.GetMemberType().IsTerminal());
 
-            foreach (var member in workbookMembers)
+            if (rootProperties.Any())
             {
-                var worksheetBuilder = GetTypedWorksheet(member);
-                worksheetBuilder.ConfigureColumns();
-                this.mConfiguration.AddWorksheet(worksheetBuilder.Configuration);
+                var rootPropertiesBuilder = GetRootWorksheetBuilder();
+                rootPropertiesBuilder.ConfigureColumns();
+                mConfiguration.AddWorksheet(rootPropertiesBuilder.Configuration);
+            }
+
+            var nonRootProperties = typeof(TWorkbook).GetMembers(bindingFlags)
+                .Except(rootProperties)
+                .Where(m => m.IsPropertyOrField());
+
+            foreach (var member in nonRootProperties)
+            {
+                WorksheetBuilder builder;
+                worksheets.TryGetValue(member, out builder);
+
+                if (builder == null)
+                {
+                    string name = this.WorksheetNamingConvention.GetName(member);
+                    builder = WorksheetBuilder.Create(name, member, mConfiguration.StylesheetProvider);
+                }
+
+                builder.ConfigureColumns();
+                this.mConfiguration.AddWorksheet(builder.Configuration);
             }
 
             return mConfiguration;
@@ -67,56 +81,49 @@ namespace OpenXmlImports
             return worksheetConfig;
         }
 
-        public WorkbookBuilder<TWorkbook> Worksheet<TWorksheet>(
-            Expression<Func<TWorkbook, IList<TWorksheet>>> member,
-            Action<WorksheetBuilder<TWorksheet>, IStylesheetProvider> action)
+        public WorkbookBuilder<TWorkbook> Singleton<TWorksheet>(
+            Expression<Func<TWorkbook, TWorksheet>> member,
+            Action<WorksheetBuilder<TWorksheet>, IStylesheetProvider> configure)
         {
-            var worksheet = GetTypedWorksheet(member);
-            action(worksheet, mConfiguration.StylesheetProvider);
-            worksheets[member.GetMemberInfo()] = worksheet;
+            var memberInfo = member.GetMemberInfo();
+            string name = this.WorksheetNamingConvention.GetName(memberInfo);
+            var worksheet = new WorksheetBuilder<TWorksheet>(name, memberInfo.Name, mConfiguration.StylesheetProvider);
+
+            configure(worksheet, mConfiguration.StylesheetProvider);
+            worksheets[memberInfo] = worksheet;
             return this;
         }
 
-        public WorksheetBuilder<TWorksheet>
-            GetWorksheet<TWorksheet>(Expression<Func<TWorkbook, IList<TWorksheet>>> memberExp)
+        public WorkbookBuilder<TWorkbook> List<TWorksheet>(
+            Expression<Func<TWorkbook, IList<TWorksheet>>> list,
+            Action<WorksheetBuilder<TWorksheet>, IStylesheetProvider> configure)
         {
-            return GetTypedWorksheet(memberExp);
+            var member = list.GetMemberInfo();
+            string name = WorksheetNamingConvention.GetName(member);
+            var worksheetBuilder = new WorksheetBuilder<TWorksheet>(name, mConfiguration.StylesheetProvider);
+            configure(worksheetBuilder, mConfiguration.StylesheetProvider);
+            worksheets[member] = worksheetBuilder;
+            return this;
         }
 
-        private WorksheetBuilder<TWorksheet> GetTypedWorksheet<TWorksheet>(Expression<Func<TWorkbook, IList<TWorksheet>>> memberExp)
+        public WorkbookBuilder<TWorkbook> RootProperties(Action<WorksheetBuilder<TWorkbook>, IStylesheetProvider> configure)
         {
-            var memberInfo = memberExp.GetMemberInfo();
+            var builder = GetRootWorksheetBuilder();
+            configure(builder, mConfiguration.StylesheetProvider);
+            return this;
+        }
 
+        private WorksheetBuilder<TWorkbook> GetRootWorksheetBuilder()
+        {
             WorksheetBuilder worksheetBuilder;
-            bool found = worksheets.TryGetValue(memberInfo, out worksheetBuilder);
 
-            if (!found)
-            {
-                string worksheetName = WorksheetNamingConvention.GetName(memberInfo);
-                worksheetBuilder = new WorksheetBuilder<TWorksheet>(worksheetName, memberInfo.Name, mConfiguration.StylesheetProvider);
-                worksheets[memberInfo] = worksheetBuilder;
-            }
+            if (worksheets.TryGetValue(typeof(TWorkbook), out worksheetBuilder))
+                return (WorksheetBuilder<TWorkbook>)worksheetBuilder;
 
-            var castConfig = (WorksheetBuilder<TWorksheet>)worksheetBuilder;
-            return castConfig;
-        }
+            var result = new WorksheetBuilder<TWorkbook>("Details", mConfiguration.StylesheetProvider);
+            worksheets[typeof(TWorkbook)] = result;
 
-        private WorksheetBuilder GetTypedWorksheet(MemberInfo memberInfo)
-        {
-            var closedCollectionType = memberInfo.GetPropertyOrFieldType().GetClosingInterface(typeof(IList<>));
-            var param = Expression.Parameter(memberInfo.DeclaringType, "x");
-            var exp = Expression.MakeMemberAccess(param, memberInfo);
-            var funcType = Expression.GetFuncType(memberInfo.DeclaringType, closedCollectionType);
-            var lambda = Expression.Lambda(funcType, exp, param);
-
-            var methods = this.GetType().GetMethods(BindingFlags.Instance | BindingFlags.NonPublic)
-                .Where(m => StringComparer.Ordinal.Equals(m.Name, "GetTypedWorksheet") && m.IsGenericMethod)
-                .ToList();
-
-            if (methods.Count == 0)
-                throw new Exception("Could not find generic overload of GetTypedWorksheet");
-
-            return (WorksheetBuilder)methods[0].MakeGenericMethod(closedCollectionType.GetGenericArguments()[0]).Invoke(this, new[] { lambda });
+            return result;
         }
     }
 }

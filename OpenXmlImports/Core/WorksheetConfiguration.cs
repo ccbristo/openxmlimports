@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -7,14 +6,14 @@ using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace OpenXmlImports.Core
 {
-    public class WorksheetConfiguration : IEnumerable<ColumnConfiguration>
+    public class WorksheetConfiguration
     {
-        private readonly List<ColumnConfiguration> mColumns = new List<ColumnConfiguration>();
+        private readonly Dictionary<MemberInfo, ColumnConfiguration> mColumns = new Dictionary<MemberInfo, ColumnConfiguration>();
         internal IStylesheetProvider StylesheetProvider { get; set; }
 
         public IEnumerable<ColumnConfiguration> Columns
         {
-            get { return mColumns.AsReadOnly(); }
+            get { return mColumns.Values; }
         }
 
         internal WorksheetConfiguration(IStylesheetProvider stylesheetProvider)
@@ -32,13 +31,17 @@ namespace OpenXmlImports.Core
             this.MemberName = memberName;
             this.BoundType = boundType;
             this.StylesheetProvider = stylesheetProvider;
-
         }
 
         public Type BoundType { get; set; }
         public string MemberName { get; set; }
         public string SheetName { get; set; }
         public bool ExportOnly { get; set; }
+
+        public ColumnConfiguration GetColumn(MemberInfo member)
+        {
+            return Columns.SingleOrDefault(c => c.Member == member);
+        }
 
         public ColumnConfiguration AddColumn(string columnName, MemberInfo member)
         {
@@ -53,7 +56,7 @@ namespace OpenXmlImports.Core
 
         public ColumnConfiguration AddColumn(ColumnConfiguration column)
         {
-            mColumns.Add(column);
+            mColumns.Add(column.Member, column);
             return column;
         }
 
@@ -71,12 +74,7 @@ namespace OpenXmlImports.Core
 
         public IEnumerator<ColumnConfiguration> GetEnumerator()
         {
-            return mColumns.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return this.GetEnumerator();
+            return mColumns.Values.GetEnumerator();
         }
     }
 }

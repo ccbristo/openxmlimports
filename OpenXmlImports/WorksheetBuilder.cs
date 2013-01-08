@@ -11,14 +11,13 @@ namespace OpenXmlImports
     {
         protected internal WorksheetConfiguration Configuration { get; set; }
         protected INamingConvention ColumnNamingConvention { get; set; }
-        readonly IDictionary<MemberInfo, ColumnBuilder> Columns = new Dictionary<MemberInfo, ColumnBuilder>();
 
-        public WorksheetBuilder(IStylesheetProvider stylesheetProvider)
+        internal WorksheetBuilder(IStylesheetProvider stylesheetProvider)
             : this(new WorksheetConfiguration(stylesheetProvider))
         { }
 
-        internal WorksheetBuilder(Type boundType, IStylesheetProvider stylesheetProvider)
-            : this(new WorksheetConfiguration(boundType, stylesheetProvider))
+        internal WorksheetBuilder(Type boundType, string sheetName, string memberName, IStylesheetProvider stylesheetProvider)
+            : this(new WorksheetConfiguration(boundType, sheetName, memberName, stylesheetProvider))
         { }
 
         private WorksheetBuilder(WorksheetConfiguration config)
@@ -44,42 +43,45 @@ namespace OpenXmlImports
             return this;
         }
 
-        protected void AddColumn(MemberInfo member, ColumnBuilder builder)
-        {
-            Columns[member] = builder;
-        }
-
         internal void ConfigureColumns()
         {
             var columnMembers = Configuration.BoundType.GetMembers(BindingFlags.Public | BindingFlags.Instance)
-                .Where(m => m.IsPropertyOrField())
+                .Where(m => m.IsPropertyOrField() && m.GetMemberType().IsTerminal())
                 .ToList();
 
             foreach (var member in columnMembers)
             {
-                ColumnBuilder columnBuilder;
-                if (Columns.TryGetValue(member, out columnBuilder))
-                {
-                    Configuration.AddColumn(columnBuilder.Configuration);
-                    continue;
-                }
+                var columnConfig = Configuration.GetColumn(member);
 
-                columnBuilder = ColumnFor(member);
-                Columns[member] = columnBuilder;
-                Configuration.AddColumn(columnBuilder.Configuration);
+                if (columnConfig == null)
+                {
+                    var columnBuilder = ColumnFor(member);
+                    Configuration.AddColumn(columnBuilder.Configuration);
+                }
             }
         }
 
         private ColumnBuilder ColumnFor(MemberInfo member)
         {
-            // since we don't know TColumn at compile type here, we have to construct it
+            // since we don't know TColumn at compile time here, we have to construct it
             // via reflection.
-            var ctor = typeof(ColumnBuilder<>).MakeGenericType(member.GetPropertyOrFieldType())
+            var ctor = typeof(ColumnBuilder<>).MakeGenericType(member.GetMemberType())
                 .GetConstructor(new[] { typeof(string), typeof(MemberInfo), typeof(IStylesheetProvider) });
 
             string name = ColumnNamingConvention.GetName(member);
             var args = new object[] { name, member, Configuration.StylesheetProvider };
             return (ColumnBuilder)ctor.Invoke(args);
+        }
+
+        internal static WorksheetBuilder Create(string name, MemberInfo member, IStylesheetProvider stylesheetProvider)
+        {
+            Type sheetType = member.GetMemberType();
+
+            if (sheetType.ClosesInterface(typeof(IList<>)))
+                sheetType = sheetType.GetClosingInterface(typeof(IList<>)).GetGenericArguments().Single();
+
+            var worksheetBuilder = new WorksheetBuilder(sheetType, name, member.Name, stylesheetProvider);
+            return worksheetBuilder;
         }
     }
 
@@ -87,11 +89,12 @@ namespace OpenXmlImports
         : WorksheetBuilder
     {
         public WorksheetBuilder(string name, string memberName, IStylesheetProvider stylesheetProvider)
-            : base(typeof(T), stylesheetProvider)
-        {
-            this.Named(name);
-            this.Configuration.MemberName = memberName;
-        }
+            : base(typeof(T), name, memberName, stylesheetProvider)
+        { }
+
+        internal WorksheetBuilder(string name, IStylesheetProvider stylesheet)
+            : this(name, null, stylesheet)
+        { }
 
         public new WorksheetBuilder<T> Named(string name)
         {
@@ -103,10 +106,12 @@ namespace OpenXmlImports
             Action<ColumnBuilder<TColumn>> action)
         {
             var member = columnExp.GetMemberInfo();
+            var columnConfig = Configuration.GetColumn(member);
+
             string columnName = ColumnNamingConvention.GetName(member);
             var columnBuilder = new ColumnBuilder<TColumn>(columnName, member, Configuration.StylesheetProvider);
             action(columnBuilder);
-            base.AddColumn(member, columnBuilder);
+            Configuration.AddColumn(columnBuilder.Configuration);
             return this;
         }
     }

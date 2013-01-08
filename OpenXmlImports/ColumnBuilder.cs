@@ -47,7 +47,7 @@ namespace OpenXmlImports
             this.Named(columnName);
             this.Configuration.Member = member;
 
-            var memberType = member.GetPropertyOrFieldType();
+            var memberType = member.GetMemberType();
             bool required = memberType.IsValueType && !memberType.IsNullable();
             Configuration.Required = required;
 
