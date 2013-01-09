@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace OpenXmlImports.Tests
@@ -44,11 +45,11 @@ namespace OpenXmlImports.Tests
                 }
             };
 
-            using (var fs = System.IO.File.Create("out.xlsx"))
+            using (var output = new MemoryStream())
             {
-                config.Export(source, fs);
-                fs.Position = 0L;
-                var imported = (SourceWorkbook)config.Import(fs);
+                config.Export(source, output);
+                output.Position = 0L;
+                var imported = (SourceWorkbook)config.Import(output);
 
                 Assert.AreEqual(Color.White, imported.Color, "imported.Color");
                 Assert.AreEqual(Color.Red, imported.NullableColor, "imported.NullableColor");
