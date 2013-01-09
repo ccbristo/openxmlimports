@@ -16,55 +16,62 @@ namespace OpenXmlImports.Tests
             public decimal CapsINTRAWord { get; set; }
             public int Has150Numbers { get; set; }
             public string ADate { get; set; }
-            public object Has_Under_Scores { get; set; }
+            public object has_under_scores { get; set; }
+            public object Under_Scores_With_Camel_Case { get; set; }
         }
 
         [TestMethod]
-        public void TestSimpleField()
+        public void SimpleField()
         {
             DoTest(x => x.SimpleField, "Simple Field");
         }
 
         [TestMethod]
-        public void TestADate()
+        public void ADate()
         {
             DoTest(x => x.ADate, "A Date");
         }
 
         [TestMethod]
-        public void TestSimpleProperty()
+        public void SimpleProperty()
         {
             DoTest(x => x.SimpleProperty, "Simple Property");
         }
 
         [TestMethod]
-        public void TestCAPPrefix()
+        public void CAPPrefix()
         {
             DoTest(x => x.CAPPrefix, "CAP Prefix");
         }
 
         [TestMethod]
-        public void TestSuffixCAP()
+        public void SuffixCAP()
         {
             DoTest(x => x.SuffixCAP, "Suffix CAP");
         }
 
         [TestMethod]
-        public void TestCapsINTRAWord()
+        public void CapsINTRAWord()
         {
             DoTest(x => x.CapsINTRAWord, "Caps INTRA Word");
         }
 
         [TestMethod]
-        public void TestNumbers()
+        public void Has150Numbers()
         {
             DoTest(x => x.Has150Numbers, "Has 150 Numbers");
         }
 
         [TestMethod]
-        public void TestUnderscores()
+        public void has_under_scores()
         {
-            DoTest(x => x.Has_Under_Scores, "Has Under Scores");
+            DoTest(x => x.has_under_scores, "has under scores");
+        }
+
+        [TestMethod]
+        public void Under_Scores_With_Camel_Case()
+        {
+            DoTest(x => x.Under_Scores_With_Camel_Case, "Under Scores With Camel Case");
         }
 
         private void DoTest<T>(Expression<Func<HasMembersForTesting, T>> memberExp, string expectedName)
