@@ -34,13 +34,13 @@ namespace OpenXmlImports.Core
             throw new DuplicatedColumnException("Found multiple columns named \"{0}\".", columnName);
         }
 
-        public void OnRequiredColumnViolation(string worksheetName, string columnName, ColumnReference colRef, int rowIndex)
+        public void OnRequiredColumnViolation(string worksheetName, string columnName, ColumnReference colRef, uint rowIndex)
         {
             throw new RequiredColumnViolationException("Column \"{0}\" on sheet \"{1}\" does not allow empty values. An empty value was found in cell {2}{3}.",
                 columnName, worksheetName, colRef, rowIndex);
         }
 
-        public void OnMaxLengthExceeded(ColumnReference colRef, int rowIndex, int maxLength, string columnName)
+        public void OnMaxLengthExceeded(ColumnReference colRef, uint rowIndex, int maxLength, string columnName)
         {
             throw new MaxLengthViolationException("The value in cell {0}{1} exceeds the max length of {2} for column \"{3}\".",
                 colRef, rowIndex, maxLength, columnName);

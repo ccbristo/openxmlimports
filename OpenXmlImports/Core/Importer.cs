@@ -46,13 +46,13 @@ namespace OpenXmlImports.Core
                 else if (string.IsNullOrEmpty(worksheetConfig.MemberName) && dataRows.Count == 1)
                 {
                     ImportItem(result, worksheetConfig, columnMap, sharedStringTable,
-                        workbookConfiguration.ErrorPolicy, 2, dataRows[0]);
+                        workbookConfiguration.ErrorPolicy, dataRows[0]);
                 }
                 else
                 {
                     var target = Create(memberType);
                     ImportItem(target, worksheetConfig, columnMap, sharedStringTable,
-                        workbookConfiguration.ErrorPolicy, 2, dataRows[0]);
+                        workbookConfiguration.ErrorPolicy, dataRows[0]);
                     worksheetMember.SetPropertyOrFieldValue(result, target);
                 }
             }
@@ -96,21 +96,18 @@ namespace OpenXmlImports.Core
             SharedStringTable sharedStrings,
             IErrorPolicy errorPolicy)
         {
-            int rowIndex = 2; // TODO [ccb] elimine this. Can use Row.RowIndex property
-
             foreach (var row in dataRows)
             {
                 var item = Create(worksheetConfig.BoundType);
-                ImportItem(item, worksheetConfig, columnMap, sharedStrings, errorPolicy, rowIndex, row);
+                ImportItem(item, worksheetConfig, columnMap, sharedStrings, errorPolicy, row);
                 list.Add(item);
-                rowIndex++;
             }
         }
 
         private static void ImportItem(
             object target, WorksheetConfiguration worksheetConfig,
             IDictionary<ColumnConfiguration, ColumnReference> columnMap,
-            SharedStringTable sharedStrings, IErrorPolicy errorPolicy, int rowIndex, Row row)
+            SharedStringTable sharedStrings, IErrorPolicy errorPolicy, Row row)
         {
             // only pay attention to columns configured in.
             // ignore any extra columns in the sheet.
@@ -124,7 +121,7 @@ namespace OpenXmlImports.Core
                 if (!cellHasValue && column.Required)
                 {
                     errorPolicy.OnRequiredColumnViolation(worksheetConfig.SheetName, column.Name,
-                        colRef, rowIndex);
+                        colRef, row.RowIndex);
                 }
                 else if (cellHasValue)
                 {
@@ -134,7 +131,7 @@ namespace OpenXmlImports.Core
 
                     if (column.Member.GetMemberType().Is<string>() &&
                         ((string)value ?? string.Empty).Length > column.MaxLength)
-                        errorPolicy.OnMaxLengthExceeded(colRef, rowIndex, column.MaxLength, column.Name);
+                        errorPolicy.OnMaxLengthExceeded(colRef, row.RowIndex, column.MaxLength, column.Name);
 
                     column.SetValue(target, value);
                 }
