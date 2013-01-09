@@ -105,6 +105,7 @@ namespace OpenXmlImports.Tests
                 var document = SpreadsheetDocument.Open(output, false);
 
                 var sheets = document.WorkbookPart.Workbook.Sheets;
+                var sharedStrings = document.WorkbookPart.SharedStringTablePart.SharedStringTable;
 
                 Assert.AreEqual(1, sheets.Count());
 
@@ -124,7 +125,7 @@ namespace OpenXmlImports.Tests
                 Assert.AreEqual(christmas2012.ToOADate().ToString(), B2.CellValue.Text, "B2");
 
                 var C2 = firstDataRow.Elements<Cell>().ToList()[2];
-                Assert.AreEqual("String 0", C2.CellValue.Text, "C2");
+                Assert.AreEqual("String 0", C2.GetCellText(sharedStrings), "C2");
 
                 var secondDataRow = rows[2];
                 var A3 = secondDataRow.Elements<Cell>().ToList()[0];
@@ -134,7 +135,7 @@ namespace OpenXmlImports.Tests
                 Assert.AreEqual(newYears2012.ToOADate().ToString(), B3.CellValue.Text, "B3");
 
                 var C3 = secondDataRow.Elements<Cell>().ToList()[2];
-                Assert.AreEqual("String 2", C3.CellValue.Text, "C3");
+                Assert.AreEqual("String 2", C3.GetCellText(sharedStrings), "C3");
             }
         }
 
