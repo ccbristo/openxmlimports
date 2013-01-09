@@ -62,6 +62,12 @@ namespace OpenXmlImports
                 memberInfo.DeclaringType.Name, memberInfo.Name));
         }
 
+        public static bool Is<T>(this Type type)
+        {
+            Type targetType = type.IsNullable() ? Nullable.GetUnderlyingType(type) : type;
+            return typeof(T).IsAssignableFrom(targetType);
+        }
+
         public static object GetPropertyOrFieldValue(this MemberInfo memberInfo, object source)
         {
             PropertyInfo propertyInfo;
@@ -102,7 +108,8 @@ namespace OpenXmlImports
                 type = Nullable.GetUnderlyingType(type);
 
             return type.IsPrimitive ||
-                type.In(typeof(string), typeof(decimal), typeof(DateTime));
+                type.Is<Enum>() ||
+                type.In(typeof(string), typeof(decimal), typeof(DateTime), typeof(Guid));
 
         }
     }

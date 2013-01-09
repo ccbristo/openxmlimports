@@ -2,6 +2,7 @@
 using System.Reflection;
 using DocumentFormat.OpenXml.Spreadsheet;
 using OpenXmlImports.Core;
+using OpenXmlImports.Types;
 
 namespace OpenXmlImports
 {
@@ -50,6 +51,7 @@ namespace OpenXmlImports
             var memberType = member.GetMemberType();
             bool required = memberType.IsValueType && !memberType.IsNullable();
             Configuration.Required = required;
+            Configuration.Type = TypeFactory.GetType(memberType);
 
             // default datetimes to the date format
             if (typeof(TColumn).In(typeof(DateTime), typeof(DateTime?)))

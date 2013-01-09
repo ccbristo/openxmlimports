@@ -125,18 +125,18 @@ namespace OpenXmlImports.Core
                 {
                     errorPolicy.OnRequiredColumnViolation(worksheetConfig.SheetName, column.Name,
                         colRef, rowIndex);
-                    continue;
                 }
                 else if (cellHasValue)
                 {
-                    string text = cell.GetCellText(sharedStrings);
+                    CellValues? dataType = cell.DataType != null ? cell.DataType.Value : (CellValues?)null;
 
-                    if (column.Member.GetMemberType() == typeof(string) &&
-                        (text ?? string.Empty).Length > column.MaxLength)
+                    object value = column.Type.NullSafeGet(cell.CellValue, dataType, sharedStrings);
+
+                    if (column.Member.GetMemberType().Is<string>() &&
+                        ((string)value ?? string.Empty).Length > column.MaxLength)
                         errorPolicy.OnMaxLengthExceeded(colRef, rowIndex, column.MaxLength, column.Name);
 
-
-                    column.SetValue(target, text);
+                    column.SetValue(target, value);
                 }
             }
         }

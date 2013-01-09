@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using DocumentFormat.OpenXml.Spreadsheet;
+using OpenXmlImports.Types;
 
 namespace OpenXmlImports.Core
 {
@@ -11,6 +12,7 @@ namespace OpenXmlImports.Core
         public NumberingFormat CellFormat { get; set; }
         public bool Required { get; set; }
         public int MaxLength { get; set; }
+        public IType Type { get; set; }
 
         public ColumnConfiguration()
         {
@@ -22,53 +24,18 @@ namespace OpenXmlImports.Core
         //public bool ListValidValuesOnError { get; set; }
         //public IComparer OptionComparer { get; set; }
 
-        internal void SetValue(object item, string text)
+        public object GetValue(object source)
         {
-            object value = Conversion.OpenXmlConvert(text, Member.GetMemberType());
-            Member.SetPropertyOrFieldValue(item, value);
+            if (source == null)
+                throw new ArgumentNullException("source");
+
+            var value = Member.GetPropertyOrFieldValue(source);
+            return value;
         }
 
-        public CellBinder GetValue(object item)
+        internal void SetValue(object target, object value)
         {
-            if (item == null)
-                throw new ArgumentNullException("item");
-
-            var value = Member.GetPropertyOrFieldValue(item);
-
-            CellValues cellType = InferCellType(Member);
-
-            if (value == null)
-                value = string.Empty;
-            else if (value is DateTime)
-                value = ((DateTime)value).ToOADate().ToString();
-
-            return new CellBinder(value.ToString(), cellType);
-        }
-
-        // TODO [ccb] This should be part of a stronger Type binding model
-        private CellValues InferCellType(MemberInfo member)
-        {
-            var memberType = member.GetMemberType();
-
-            if (memberType.IsNullable())
-                memberType = Nullable.GetUnderlyingType(memberType);
-
-            if (memberType.In(typeof(string), typeof(char)))
-                return CellValues.String;
-
-            if (memberType == typeof(bool))
-                return CellValues.Boolean;
-
-            if (memberType.In(typeof(byte), typeof(sbyte),
-                typeof(short), typeof(ushort),
-                typeof(int), typeof(uint),
-                typeof(long), typeof(ulong),
-                typeof(float), typeof(double), typeof(decimal),
-                typeof(DateTime))) // date times are stored as numbers with special styling
-                return CellValues.Number;
-
-            throw new ArgumentOutOfRangeException("member", string.Format("Could not determine cell type for {0}",
-                member.Name));
+            Member.SetPropertyOrFieldValue(target, value);
         }
     }
 }

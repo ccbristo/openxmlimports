@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using DocumentFormat.OpenXml.Spreadsheet;
+using OpenXmlImports.Types;
 
 namespace OpenXmlImports.Core
 {
@@ -48,7 +49,8 @@ namespace OpenXmlImports.Core
             var column = new ColumnConfiguration
             {
                 Name = columnName,
-                Member = member
+                Member = member,
+                Type = TypeFactory.GetType(member.GetMemberType())
             };
 
             return AddColumn(column);
