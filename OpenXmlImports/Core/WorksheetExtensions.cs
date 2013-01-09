@@ -1,23 +1,17 @@
 ﻿using System.Linq;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Spreadsheet;
+using OpenXmlImports.Types;
 
 namespace OpenXmlImports.Core
 {
     public static class WorksheetExtensions
     {
+        static readonly StringType StringType = new StringType();
+
         public static string GetCellText(this Cell cell, SharedStringTable sharedStrings)
         {
-            if (cell.DataType != null && cell.DataType == CellValues.SharedString)
-            {
-                // TODO [ccb] Shared strings may also be "runs" to allow for 
-                // formatting to be applied within a cell. Need to figure out how to support that.
-                int index = int.Parse(cell.CellValue.Text);
-                var sharedStringItem = (SharedStringItem)sharedStrings.ElementAt(index);
-                return sharedStringItem.Text.Text;
-            }
-
-            return cell.CellValue == null ? string.Empty : cell.CellValue.Text;
+            return (string)StringType.NullSafeGet(cell.CellValue, cell.DataType, sharedStrings);
         }
 
         static readonly char[] numbers = Enumerable.Range('0', 10).Select(i => (char)i).ToArray();
