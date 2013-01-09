@@ -17,7 +17,7 @@ namespace OpenXmlImports.Core
             workbookPart.Workbook = new Workbook();
 
             var stylesPart = workbookPart.AddNewPart<WorkbookStylesPart>();
-            stylesPart.Stylesheet = workbookConfig.StylesheetProvider.Stylesheet;
+            stylesPart.Stylesheet = (Stylesheet)workbookConfig.StylesheetProvider.Stylesheet.CloneNode(true);
 
             var sheets = document.WorkbookPart.Workbook.AppendChild<Sheets>(new Sheets());
 

@@ -37,8 +37,9 @@ namespace OpenXmlImports.Tests
             DateTime christmas2012 = new DateTime(2012, 12, 25, 11, 59, 30);
             DateTime newYears2012 = new DateTime(2013, 1, 1);
 
-            var config = new WorkbookConfiguration(typeof(SingleTableHierarchy));
             var stylesheetProvider = new DefaultStylesheetProvider();
+            var config = new WorkbookConfiguration(typeof(SingleTableHierarchy), stylesheetProvider);
+
             var singleTableItemSheet = new WorksheetConfiguration(typeof(SingleTableItem), "Single Table", "SingleTableItems", stylesheetProvider);
             singleTableItemSheet.SheetName = "Item 1s";
 
@@ -78,7 +79,7 @@ namespace OpenXmlImports.Tests
             DateTime christmas2012 = new DateTime(2012, 12, 25, 11, 59, 30);
             DateTime newYears2012 = new DateTime(2013, 1, 1);
 
-            var config = new WorkbookConfiguration(typeof(SingleTableHierarchy));
+            var config = new WorkbookConfiguration(typeof(SingleTableHierarchy), new DefaultStylesheetProvider());
             var stylesheetProvider = new DefaultStylesheetProvider();
             var singleTableItemSheet = new WorksheetConfiguration(typeof(SingleTableItem), "Single Table", "SingleTableItems", stylesheetProvider);
             singleTableItemSheet.SheetName = "Item 1s";
@@ -101,8 +102,8 @@ namespace OpenXmlImports.Tests
         [TestMethod]
         public void Error_If_Null_In_A_Required_Column()
         {
-            var config = new WorkbookConfiguration(typeof(SingleTableHierarchy));
             var stylesheetProvider = new DefaultStylesheetProvider();
+            var config = new WorkbookConfiguration(typeof(SingleTableHierarchy), stylesheetProvider);
             var singleTableItemSheet = new WorksheetConfiguration(typeof(SingleTableItem), "Single Table", "SingleTableItems", stylesheetProvider);
             singleTableItemSheet.SheetName = "Item 1s";
 
@@ -134,8 +135,8 @@ namespace OpenXmlImports.Tests
         [TestMethod]
         public void Missing_Worksheet()
         {
-            var config = new WorkbookConfiguration(typeof(SingleTableHierarchy));
             var stylesheetProvider = new DefaultStylesheetProvider();
+            var config = new WorkbookConfiguration(typeof(SingleTableHierarchy), stylesheetProvider);
             var singleTableItemSheet = new WorksheetConfiguration(typeof(SingleTableItem), "Single Table", "SingleTableItems", stylesheetProvider);
             singleTableItemSheet.SheetName = "Item 1s";
             singleTableItemSheet.AddColumn("I", SingleTableHierarchyIMember);
@@ -161,7 +162,7 @@ namespace OpenXmlImports.Tests
         [TestMethod]
         public void Missing_Column()
         {
-            var config = new WorkbookConfiguration(typeof(SingleTableHierarchy));
+            var config = new WorkbookConfiguration(typeof(SingleTableHierarchy), new DefaultStylesheetProvider());
             var singleTableItemSheet = new WorksheetConfiguration(typeof(SingleTableItem), "Single Table", "SingleTableItems", config.StylesheetProvider);
             singleTableItemSheet.SheetName = "Item 1s";
             singleTableItemSheet.AddColumn("I", SingleTableHierarchyIMember);
@@ -193,7 +194,7 @@ namespace OpenXmlImports.Tests
         [TestMethod]
         public void Duplicated_Columns()
         {
-            var config = new WorkbookConfiguration(typeof(SingleTableHierarchy));
+            var config = new WorkbookConfiguration(typeof(SingleTableHierarchy), new DefaultStylesheetProvider());
             var singleTableItemSheet = new WorksheetConfiguration(typeof(SingleTableItem), "Single Table", "SingleTableItems", config.StylesheetProvider);
             singleTableItemSheet.SheetName = "Item 1s";
             singleTableItemSheet.AddColumn("I", SingleTableHierarchyIMember);
@@ -219,8 +220,8 @@ namespace OpenXmlImports.Tests
         [TestMethod]
         public void Import_Max_Length_Exceeded()
         {
-            var config = new WorkbookConfiguration(typeof(SingleTableHierarchy));
             var stylesheetProvider = new DefaultStylesheetProvider();
+            var config = new WorkbookConfiguration(typeof(SingleTableHierarchy), stylesheetProvider);
             var singleTableItemSheet = new WorksheetConfiguration(typeof(SingleTableItem), "Single Table", "SingleTableItems", stylesheetProvider);
             singleTableItemSheet.SheetName = "Item 1s";
 
@@ -251,7 +252,7 @@ namespace OpenXmlImports.Tests
         [TestMethod]
         public void Importer_Completes_Error_Policy()
         {
-            var config = new WorkbookConfiguration(typeof(SingleTableHierarchy));
+            var config = new WorkbookConfiguration(typeof(SingleTableHierarchy), new DefaultStylesheetProvider());
             config.ErrorPolicy = new AggregatingExceptionErrorPolicy();
             var singleTableItemSheet = new WorksheetConfiguration(typeof(SingleTableItem), "Single Table", "SingleTableItems", config.StylesheetProvider);
             singleTableItemSheet.SheetName = "Item 1s";
@@ -281,7 +282,7 @@ namespace OpenXmlImports.Tests
         [TestMethod]
         public void Import_Root_Properties_And_Fields()
         {
-            var config = new WorkbookConfiguration(typeof(RootPropertiesHierarchy));
+            var config = new WorkbookConfiguration(typeof(RootPropertiesHierarchy), new DefaultStylesheetProvider());
 
             var detailsSheet = new WorksheetConfiguration(typeof(RootPropertiesHierarchy), "Details", null, config.StylesheetProvider);
             detailsSheet.AddColumn("I", RootPropertiesHierarchyMembers.I);

@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Linq;
 using DocumentFormat.OpenXml.Spreadsheet;
 
-namespace OpenXmlImports.Core
+namespace OpenXmlImports
 {
     public class DefaultStylesheetProvider : IStylesheetProvider
     {

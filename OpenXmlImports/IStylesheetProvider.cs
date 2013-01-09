@@ -1,6 +1,6 @@
 ﻿using DocumentFormat.OpenXml.Spreadsheet;
 
-namespace OpenXmlImports.Core
+namespace OpenXmlImports
 {
     public interface IStylesheetProvider
     {

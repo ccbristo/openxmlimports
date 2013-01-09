@@ -7,15 +7,17 @@ using OpenXmlImports.Core;
 
 namespace OpenXmlImports
 {
-    public class WorkbookBuilder<TWorkbook>
+    public class WorkbookBuilder<TWorkbook, TStylesheet>
+        where TStylesheet : IStylesheetProvider
     {
-        private readonly WorkbookConfiguration mConfiguration = new WorkbookConfiguration(typeof(TWorkbook));
+        private readonly WorkbookConfiguration mConfiguration;
         private readonly Dictionary<object, WorksheetBuilder> worksheets = new Dictionary<object, WorksheetBuilder>();
         private INamingConvention WorksheetNamingConvention;
 
-        public WorkbookBuilder()
+        public WorkbookBuilder(TStylesheet stylesheet)
         {
             WorksheetNamingConvention = new CamelCaseNamingConvention();
+            mConfiguration = new WorkbookConfiguration(typeof(TWorkbook), stylesheet);
         }
 
         public WorkbookConfiguration Create()
@@ -54,17 +56,11 @@ namespace OpenXmlImports
             return mConfiguration;
         }
 
-        public WorkbookBuilder<TWorkbook> Stylesheet(IStylesheetProvider stylesheetProvider)
+        public WorkbookBuilder<TWorkbook, TStylesheet> Worksheet(string name, Action<WorksheetBuilder> configure)
         {
-            mConfiguration.StylesheetProvider = stylesheetProvider;
-            return this;
-        }
-
-        public WorkbookBuilder<TWorkbook> Worksheet(string name, Action<WorksheetBuilder> action)
-        {
-            WorksheetBuilder worksheetConfig = GetNamedWorksheet(name);
-            action(worksheetConfig);
-            worksheets[name] = worksheetConfig;
+            var worksheetBuilder = GetNamedWorksheet(name);
+            configure(worksheetBuilder);
+            worksheets[name] = worksheetBuilder;
             return this;
         }
 
@@ -81,35 +77,35 @@ namespace OpenXmlImports
             return worksheetConfig;
         }
 
-        public WorkbookBuilder<TWorkbook> Singleton<TWorksheet>(
+        public WorkbookBuilder<TWorkbook, TStylesheet> Singleton<TWorksheet>(
             Expression<Func<TWorkbook, TWorksheet>> member,
-            Action<WorksheetBuilder<TWorksheet>, IStylesheetProvider> configure)
+            Action<WorksheetBuilder<TWorksheet>, TStylesheet> configure)
         {
             var memberInfo = member.GetMemberInfo();
             string name = this.WorksheetNamingConvention.GetName(memberInfo);
             var worksheet = new WorksheetBuilder<TWorksheet>(name, memberInfo.Name, mConfiguration.StylesheetProvider);
 
-            configure(worksheet, mConfiguration.StylesheetProvider);
+            configure(worksheet, (TStylesheet)mConfiguration.StylesheetProvider);
             worksheets[memberInfo] = worksheet;
             return this;
         }
 
-        public WorkbookBuilder<TWorkbook> List<TWorksheet>(
+        public WorkbookBuilder<TWorkbook, TStylesheet> List<TWorksheet>(
             Expression<Func<TWorkbook, IList<TWorksheet>>> list,
-            Action<WorksheetBuilder<TWorksheet>, IStylesheetProvider> configure)
+            Action<WorksheetBuilder<TWorksheet>, TStylesheet> configure)
         {
             var member = list.GetMemberInfo();
             string name = WorksheetNamingConvention.GetName(member);
             var worksheetBuilder = new WorksheetBuilder<TWorksheet>(name, mConfiguration.StylesheetProvider);
-            configure(worksheetBuilder, mConfiguration.StylesheetProvider);
+            configure(worksheetBuilder, (TStylesheet)mConfiguration.StylesheetProvider);
             worksheets[member] = worksheetBuilder;
             return this;
         }
 
-        public WorkbookBuilder<TWorkbook> RootProperties(Action<WorksheetBuilder<TWorkbook>, IStylesheetProvider> configure)
+        public WorkbookBuilder<TWorkbook, TStylesheet> RootProperties(Action<WorksheetBuilder<TWorkbook>, TStylesheet> configure)
         {
             var builder = GetRootWorksheetBuilder();
-            configure(builder, mConfiguration.StylesheetProvider);
+            configure(builder, (TStylesheet)mConfiguration.StylesheetProvider);
             return this;
         }
 

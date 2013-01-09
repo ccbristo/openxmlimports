@@ -10,13 +10,13 @@ namespace OpenXmlImports.Core
         public string Name { get; set; }
         public Type BoundType { get; private set; }
         public IErrorPolicy ErrorPolicy { get; set; }
-        public IStylesheetProvider StylesheetProvider { get; set; }
+        public IStylesheetProvider StylesheetProvider { get; private set; }
         private readonly Dictionary<object, WorksheetConfiguration> mWorksheets = new Dictionary<object, WorksheetConfiguration>();
 
-        public WorkbookConfiguration(Type boundType)
+        public WorkbookConfiguration(Type boundType, IStylesheetProvider stylesheetProvider)
         {
             BoundType = boundType;
-            StylesheetProvider = new DefaultStylesheetProvider();
+            StylesheetProvider = stylesheetProvider;
             ErrorPolicy = new ImmediateExceptionErrorPolicy();
         }
 
