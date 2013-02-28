@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace OpenXmlImports.Core
 {
-    public class WorkbookConfiguration
+    public class WorkbookConfiguration<TWorkbook>
     {
         public string Name { get; set; }
         public Type BoundType { get; private set; }
@@ -13,9 +13,9 @@ namespace OpenXmlImports.Core
         public IStylesheetProvider StylesheetProvider { get; private set; }
         private readonly Dictionary<object, WorksheetConfiguration> mWorksheets = new Dictionary<object, WorksheetConfiguration>();
 
-        public WorkbookConfiguration(Type boundType, IStylesheetProvider stylesheetProvider)
+        public WorkbookConfiguration(IStylesheetProvider stylesheetProvider)
         {
-            BoundType = boundType;
+            BoundType = typeof(TWorkbook);
             StylesheetProvider = stylesheetProvider;
             ErrorPolicy = new ImmediateExceptionErrorPolicy();
         }
@@ -66,13 +66,13 @@ namespace OpenXmlImports.Core
             return value;
         }
 
-        public void Export(object workbookSource, Stream output)
+        public void Export(TWorkbook workbookSource, Stream output)
         {
             Exporter exporter = new Exporter();
             exporter.Export(this, workbookSource, output);
         }
 
-        public object Import(Stream input)
+        public TWorkbook Import(Stream input)
         {
             Importer importer = new Importer();
             return importer.Import(this, input);

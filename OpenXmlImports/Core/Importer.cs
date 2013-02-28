@@ -13,9 +13,9 @@ namespace OpenXmlImports.Core
 {
     public class Importer
     {
-        public object Import(WorkbookConfiguration workbookConfiguration, Stream input)
+        public TWorkbook Import<TWorkbook>(WorkbookConfiguration<TWorkbook> workbookConfiguration, Stream input)
         {
-            object result = Create(workbookConfiguration.BoundType);
+            var result = (TWorkbook)Create(workbookConfiguration.BoundType);
             var document = CreateDocument(input, workbookConfiguration.ErrorPolicy);
             var sharedStringTable = document.WorkbookPart.SharedStringTablePart.SharedStringTable;
             var sheets = document.WorkbookPart.Workbook.Sheets;

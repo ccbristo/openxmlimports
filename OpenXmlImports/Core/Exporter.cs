@@ -8,7 +8,7 @@ namespace OpenXmlImports.Core
 {
     internal class Exporter
     {
-        public void Export(WorkbookConfiguration workbookConfig, object workbookSource, Stream output)
+        public void Export<TWorkbook>(WorkbookConfiguration<TWorkbook> workbookConfig, TWorkbook workbookSource, Stream output)
         {
             var document = SpreadsheetDocument.Create(output, SpreadsheetDocumentType.Workbook);
             var workbookPart = document.AddWorkbookPart();

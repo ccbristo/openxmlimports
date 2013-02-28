@@ -40,7 +40,7 @@ namespace OpenXmlImports.Tests
         [TestMethod]
         public void Can_Export_Worksheets()
         {
-            var config = new WorkbookConfiguration(typeof(SimpleHierarchy), new DefaultStylesheetProvider());
+            var config = new WorkbookConfiguration<SimpleHierarchy>(new DefaultStylesheetProvider());
             var dataSource = new SimpleHierarchy()
             {
                 Item1s = new List<Item1>(),
@@ -73,7 +73,7 @@ namespace OpenXmlImports.Tests
         [TestMethod]
         public void Can_Export_Columns()
         {
-            var config = new WorkbookConfiguration(typeof(SingleTableHierarchy), new DefaultStylesheetProvider());
+            var config = new WorkbookConfiguration<SingleTableHierarchy>(new DefaultStylesheetProvider());
 
             DateTime christmas2012 = new DateTime(2012, 12, 25, 11, 59, 30);
             DateTime newYears2012 = new DateTime(2013, 1, 1);
@@ -142,7 +142,7 @@ namespace OpenXmlImports.Tests
         [TestMethod]
         public void Export_Null_In_Required_Column_Throws_Exception()
         {
-            var config = new WorkbookConfiguration(typeof(SingleTableHierarchy), new DefaultStylesheetProvider());
+            var config = new WorkbookConfiguration<SingleTableHierarchy>(new DefaultStylesheetProvider());
             var dataSource = new SingleTableHierarchy()
             {
                 SingleTableItems = new List<SingleTableItem>()
@@ -175,7 +175,7 @@ namespace OpenXmlImports.Tests
         [TestMethod]
         public void Export_Max_Length_Exceed_Throws_Exception()
         {
-            var config = new WorkbookConfiguration(typeof(SingleTableHierarchy), new DefaultStylesheetProvider());
+            var config = new WorkbookConfiguration<SingleTableHierarchy>(new DefaultStylesheetProvider());
             var dataSource = new SingleTableHierarchy()
             {
                 SingleTableItems = new List<SingleTableItem>()
@@ -208,7 +208,7 @@ namespace OpenXmlImports.Tests
         [TestMethod]
         public void Can_Export_Singletons_And_Root_Properties()
         {
-            var config = new WorkbookConfiguration(typeof(RootPropertiesHierarchy), new DefaultStylesheetProvider());
+            var config = new WorkbookConfiguration<RootPropertiesHierarchy>(new DefaultStylesheetProvider());
 
             var detailsSheet = new WorksheetConfiguration(typeof(RootPropertiesHierarchy), "Details", null, config.StylesheetProvider);
             detailsSheet.AddColumn("Data", RootPropertiesHierarchyMembers.Data);

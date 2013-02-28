@@ -10,17 +10,17 @@ namespace OpenXmlImports
     public class WorkbookBuilder<TWorkbook, TStylesheet>
         where TStylesheet : IStylesheetProvider
     {
-        private readonly WorkbookConfiguration mConfiguration;
+        private readonly WorkbookConfiguration<TWorkbook> mConfiguration;
         private readonly Dictionary<object, WorksheetBuilder> worksheets = new Dictionary<object, WorksheetBuilder>();
         private INamingConvention WorksheetNamingConvention;
 
         public WorkbookBuilder(TStylesheet stylesheet)
         {
             WorksheetNamingConvention = new CamelCaseNamingConvention();
-            mConfiguration = new WorkbookConfiguration(typeof(TWorkbook), stylesheet);
+            mConfiguration = new WorkbookConfiguration<TWorkbook>(stylesheet);
         }
 
-        public WorkbookConfiguration Create()
+        public WorkbookConfiguration<TWorkbook> Create()
         {
             var bindingFlags = BindingFlags.Public | BindingFlags.Instance;
 
