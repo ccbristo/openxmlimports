@@ -49,7 +49,7 @@ namespace OpenXmlImports.Tests
             {
                 config.Export(source, output);
                 output.Position = 0L;
-                var imported = (SourceWorkbook)config.Import(output);
+                var imported = config.Import(output);
 
                 Assert.AreEqual(Color.White, imported.Color, "imported.Color");
                 Assert.AreEqual(Color.Red, imported.NullableColor, "imported.NullableColor");

@@ -51,7 +51,7 @@ namespace OpenXmlImports.Tests
 
             SingleTableHierarchy result;
             using (var input = Assembly.GetExecutingAssembly().GetManifestResourceStream("OpenXmlImports.Tests.TestFiles.Valid_Import.xlsx"))
-                result = (SingleTableHierarchy)config.Import(input);
+                result = config.Import(input);
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.SingleTableItems, "result.SingleTableItems == null");
@@ -92,7 +92,7 @@ namespace OpenXmlImports.Tests
 
             SingleTableHierarchy result;
             using (var input = Assembly.GetExecutingAssembly().GetManifestResourceStream("OpenXmlImports.Tests.TestFiles.Rows_With_No_Cell_Values.xlsx"))
-                result = (SingleTableHierarchy)config.Import(input);
+                result = config.Import(input);
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.SingleTableItems, "result.SingleTableItems == null");
@@ -118,7 +118,7 @@ namespace OpenXmlImports.Tests
             {
                 SingleTableHierarchy result;
                 using (var input = Assembly.GetExecutingAssembly().GetManifestResourceStream("OpenXmlImports.Tests.TestFiles.Null_In_A_Non_Nullable_Column.xlsx"))
-                    result = (SingleTableHierarchy)config.Import(input);
+                    result = config.Import(input);
 
                 Assert.Fail("Should have failed due to null in a required column.");
             }
@@ -149,7 +149,7 @@ namespace OpenXmlImports.Tests
             {
                 SingleTableHierarchy result;
                 using (var input = Assembly.GetExecutingAssembly().GetManifestResourceStream("OpenXmlImports.Tests.TestFiles.Missing_Worksheet.xlsx"))
-                    result = (SingleTableHierarchy)config.Import(input);
+                    result = config.Import(input);
 
                 Assert.Fail("Should have thrown an exception due to missing worksheet.");
             }
@@ -175,7 +175,7 @@ namespace OpenXmlImports.Tests
             {
                 SingleTableHierarchy result;
                 using (var input = Assembly.GetExecutingAssembly().GetManifestResourceStream("OpenXmlImports.Tests.TestFiles.Missing_Column.xlsx"))
-                    result = (SingleTableHierarchy)config.Import(input);
+                    result = config.Import(input);
 
                 Assert.Fail("Should have thrown an exception due to missing column.");
             }
@@ -207,7 +207,7 @@ namespace OpenXmlImports.Tests
             {
                 SingleTableHierarchy result;
                 using (var input = Assembly.GetExecutingAssembly().GetManifestResourceStream("OpenXmlImports.Tests.TestFiles.Duplicated_Columns.xlsx"))
-                    result = (SingleTableHierarchy)config.Import(input);
+                    result = config.Import(input);
 
                 Assert.Fail("Should have thrown an exception due to duplicated column.");
             }
@@ -236,7 +236,7 @@ namespace OpenXmlImports.Tests
             {
                 SingleTableHierarchy result;
                 using (var input = Assembly.GetExecutingAssembly().GetManifestResourceStream("OpenXmlImports.Tests.TestFiles.Max_Length_Exceeded.xlsx"))
-                    result = (SingleTableHierarchy)config.Import(input);
+                    result = config.Import(input);
                 Assert.Fail("Import should have failed due to max length violation.");
             }
             catch (MaxLengthViolationException ex)
@@ -269,7 +269,7 @@ namespace OpenXmlImports.Tests
             {
                 SingleTableHierarchy result;
                 using (var input = Assembly.GetExecutingAssembly().GetManifestResourceStream("OpenXmlImports.Tests.TestFiles.Multiple_Errors.xlsx"))
-                    result = (SingleTableHierarchy)config.Import(input);
+                    result = config.Import(input);
 
                 Assert.Fail("Should have thrown an exception due to errors.");
             }
@@ -299,7 +299,7 @@ namespace OpenXmlImports.Tests
 
 
             using (var input = Assembly.GetExecutingAssembly().GetManifestResourceStream("OpenXmlImports.Tests.TestFiles.Import_Root_Properties_And_Fields.xlsx"))
-                h = (RootPropertiesHierarchy)config.Import(input);
+                h = config.Import(input);
 
             Assert.AreEqual(1, h.I, "I");
             Assert.AreEqual("Some data", h.Data, "Data");
