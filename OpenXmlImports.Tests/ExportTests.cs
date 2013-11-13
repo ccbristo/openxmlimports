@@ -259,7 +259,7 @@ namespace OpenXmlImports.Tests
         }
 
         [TestMethod]
-        public void Can_Export_Custom_Column_Name()
+        public void Can_Export_Customized_List()
         {
             var config = OpenXmlConfiguration.Workbook<SimpleHierarchy>()
                 .List(sh => sh.Item1s, (item1Sheet, styles) =>
@@ -287,6 +287,38 @@ namespace OpenXmlImports.Tests
 
             using (var ms = new MemoryStream())
                 config.Export(source, ms);
+        }
+
+        [TestMethod]
+        public void Can_Export_Customized_Singletons()
+        {
+            var config = OpenXmlConfiguration.Workbook<RootPropertiesHierarchy>()
+                .RootProperties((rootSheet, styles) =>
+                {
+                    rootSheet.Named("Root Stuff");
+                    rootSheet.Column(rph => rph.I, iColumn => iColumn.Named("Should have been I"));
+                })
+                .Singleton(rph => rph.SingleItem, (singleItemSheet, styles) =>
+                {
+                    singleItemSheet.Named("Custom Single Item Name");
+                    singleItemSheet.Column(singleItem => singleItem.J, jColumn => jColumn.Named("Not J"));
+                })
+                .Create();
+
+            var source = new RootPropertiesHierarchy
+            {
+                SingleItem = new Item{ J = 1, S = "Stuff"},
+                Data = "The data",
+                I =  15
+            };
+
+            using (var ms = new MemoryStream())
+            {
+                config.Export(source, ms);
+                SaveToFile(ms, "test.xlsx");
+            }
+
+            OpenInExcel("test.xlsx");
         }
 
         private static void SaveToFile(MemoryStream ms, string name)
