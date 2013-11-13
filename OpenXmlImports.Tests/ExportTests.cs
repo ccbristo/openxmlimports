@@ -313,12 +313,7 @@ namespace OpenXmlImports.Tests
             };
 
             using (var ms = new MemoryStream())
-            {
                 config.Export(source, ms);
-                SaveToFile(ms, "test.xlsx");
-            }
-
-            OpenInExcel("test.xlsx");
         }
 
         private static void SaveToFile(MemoryStream ms, string name)
