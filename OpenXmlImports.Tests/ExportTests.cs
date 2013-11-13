@@ -258,6 +258,37 @@ namespace OpenXmlImports.Tests
             }
         }
 
+        [TestMethod]
+        public void Can_Export_Custom_Column_Name()
+        {
+            var config = OpenXmlConfiguration.Workbook<SimpleHierarchy>()
+                .List(sh => sh.Item1s, (item1Sheet, styles) =>
+                {
+                    item1Sheet.Named("Custom Item 1 Name");
+                    item1Sheet.Column(item1 => item1.Name, nameColumn => nameColumn.Named("The Fricking Name Column"));
+                })
+                .Create();
+
+            var source = new SimpleHierarchy
+            {
+                Item1s = new List<Item1>
+                {
+                    new Item1{ Name =  "First", Value = 3},
+                    new Item1{ Name =  "Second", Value = 2},
+                    new Item1{ Name =  "Third", Value = 1},
+                },
+                Item2s = new List<Item2>
+                {
+                    new Item2{ Title = "First", ADate =  DateTime.Now },
+                    new Item2{ Title = "Second", ADate =  DateTime.Now.AddDays(-1) },
+                    new Item2{ Title = "Third", ADate =  DateTime.Now.AddDays(-1) }
+                }
+            };
+
+            using (var ms = new MemoryStream())
+                config.Export(source, ms);
+        }
+
         private static void SaveToFile(MemoryStream ms, string name)
         {
             using (var fs = File.OpenWrite(name))

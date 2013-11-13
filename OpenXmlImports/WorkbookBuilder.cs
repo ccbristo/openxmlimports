@@ -96,7 +96,7 @@ namespace OpenXmlImports
         {
             var member = list.GetMemberInfo();
             string name = WorksheetNamingConvention.GetName(member);
-            var worksheetBuilder = new WorksheetBuilder<TWorksheet>(name, mConfiguration.StylesheetProvider);
+            var worksheetBuilder = new WorksheetBuilder<TWorksheet>(name, member.Name, mConfiguration.StylesheetProvider);
             configure(worksheetBuilder, (TStylesheet)mConfiguration.StylesheetProvider);
             worksheets[member] = worksheetBuilder;
             return this;
