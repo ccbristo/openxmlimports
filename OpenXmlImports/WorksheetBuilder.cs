@@ -55,22 +55,11 @@ namespace OpenXmlImports
 
                 if (columnConfig == null)
                 {
-                    var columnBuilder = ColumnFor(member);
+                    string name = ColumnNamingConvention.GetName(member);
+                    var columnBuilder = ColumnBuilder.For(member, name, Configuration.StylesheetProvider);
                     Configuration.AddColumn(columnBuilder.Configuration);
                 }
             }
-        }
-
-        private ColumnBuilder ColumnFor(MemberInfo member)
-        {
-            // since we don't know TColumn at compile time here, we have to construct it
-            // via reflection.
-            var ctor = typeof(ColumnBuilder<>).MakeGenericType(member.GetMemberType())
-                .GetConstructor(new[] { typeof(string), typeof(MemberInfo), typeof(IStylesheetProvider) });
-
-            string name = ColumnNamingConvention.GetName(member);
-            var args = new object[] { name, member, Configuration.StylesheetProvider };
-            return (ColumnBuilder)ctor.Invoke(args);
         }
 
         internal static WorksheetBuilder Create(string name, MemberInfo member, IStylesheetProvider stylesheetProvider)

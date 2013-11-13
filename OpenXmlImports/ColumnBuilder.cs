@@ -8,6 +8,10 @@ namespace OpenXmlImports
 {
     public class ColumnBuilder
     {
+        // TODO [ccb] I would prefer this weren't publicly exposed. Currently only used by tests.
+        // I considered adding a .Format() method to this class to satisfy the test method,
+        // but that doesn't seem to fit well with the other Builder APIs since they do not
+        // and in most cases cannot do this (e.g., Required() already exists, and sets Required = true)
         public ColumnConfiguration Configuration { get; private set; }
 
         internal ColumnBuilder()
@@ -36,6 +40,20 @@ namespace OpenXmlImports
         {
             Configuration.Required = required;
             return this;
+        }
+
+        public static ColumnBuilder For(MemberInfo member, string name, IStylesheetProvider stylesheetProvider)
+        {
+            // since we don't know the type of the member at compile time,
+            // we have to create the ColumnBuilder<TColumn> via reflection
+            var ctor = typeof(ColumnBuilder<>).MakeGenericType(member.GetMemberType())
+               .GetConstructor(new[] { typeof(string), typeof(MemberInfo), typeof(IStylesheetProvider) });
+
+            if(ctor == null)
+                throw new InvalidOperationException("Could not find ColumnBuilder constructor");
+
+            var args = new object[] { name, member, stylesheetProvider };
+            return (ColumnBuilder)ctor.Invoke(args);
         }
     }
 
