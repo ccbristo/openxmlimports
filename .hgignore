@@ -3,5 +3,6 @@ syntax: glob
 TestResults
 bin/
 obj/
+packages/
 *.user
 *.suo
