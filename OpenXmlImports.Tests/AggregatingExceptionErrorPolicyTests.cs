@@ -31,6 +31,7 @@ namespace OpenXmlImports.Tests
             try
             {
                 policy.OnImportComplete();
+                Assert.Fail("InvalidImportFileException was not thrown when the import was completed with errors.");
             }
             catch (InvalidImportFileException)
             {
