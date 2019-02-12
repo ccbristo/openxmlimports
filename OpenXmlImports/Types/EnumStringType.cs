@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Linq;
+using System.Reflection;
 using DocumentFormat.OpenXml.Spreadsheet;
+using OpenXmlImports.Core;
 
 namespace OpenXmlImports.Types
 {
@@ -7,6 +10,14 @@ namespace OpenXmlImports.Types
     {
         public Type EnumType { get; private set; }
         private readonly StringType StringType = new StringType();
+
+        private static readonly MethodInfo EnumTryParseGenericMethodInfo;
+
+        static EnumStringType()
+        {
+            EnumTryParseGenericMethodInfo = typeof(Enum).GetMethods(BindingFlags.Public | BindingFlags.Static)
+                .Single(m => m.IsGenericMethod && m.Name == "TryParse" && m.GetParameters().Length == 3);
+        }
 
         public EnumStringType(Type enumType)
         {
@@ -19,32 +30,56 @@ namespace OpenXmlImports.Types
 
         public string FriendlyName { get; private set; }
 
-        public CellValues DataType
-        {
-            get { return StringType.DataType; }
-        }
+        public CellValues DataType => StringType.DataType;
 
         public object NullSafeGet(CellValue cellValue, CellValues? cellType, SharedStringTable sharedStrings)
         {
             string s = (string)StringType.NullSafeGet(cellValue, cellType, sharedStrings);
-
-            if (string.IsNullOrWhiteSpace(s))
-                return null;
-
-            return Enum.Parse(EnumType, s);
+            return Parse(s);
         }
 
         public void NullSafeSet(CellValue cellValue, object value, SharedStringTable sharedStrings)
         {
-            value = value != null ? value.ToString() : null;
+            value = Format(value);
             StringType.NullSafeSet(cellValue, value, sharedStrings);
         }
-    }
 
-    public class EnumStringType<T> : EnumStringType
-    {
-        public EnumStringType()
-            : base(typeof(T))
-        { }
+        internal object Format(object value)
+        {
+            return value == null ? null : CamelCaseFormatter.Format(value.ToString());
+        }
+
+        internal object Parse(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s))
+                return null;
+
+            if (DynamicTryParse(s, out Enum e))
+                return e;
+
+            var formattedTextValues = Enum.GetValues(EnumType)
+                .Cast<Enum>()
+                .ToDictionary(val => CamelCaseFormatter.Format(val.ToString()), val => val);
+
+            if (formattedTextValues.TryGetValue(s, out e))
+                return e;
+
+            return new FormatException($"Could not convert {s} to an {EnumType.Name}.");
+        }
+
+        private bool DynamicTryParse(string s, out Enum @enum)
+        {
+            @enum = default(Enum);
+
+            var closedMethod = EnumTryParseGenericMethodInfo.MakeGenericMethod(EnumType);
+            var parameters = new object[] { s, true, null };
+            var result = (bool)closedMethod.Invoke(null, parameters);
+
+            if (result)
+                @enum = (Enum)parameters[2]; // get the out parameter
+
+            return result;
+
+        }
     }
 }
