@@ -12,10 +12,9 @@ namespace OpenXmlImports.Core
         private readonly Dictionary<MemberInfo, ColumnConfiguration> mColumns = new Dictionary<MemberInfo, ColumnConfiguration>();
         internal IStylesheetProvider StylesheetProvider { get; set; }
 
-        public IEnumerable<ColumnConfiguration> Columns
-        {
-            get { return mColumns.Values; }
-        }
+        public IEnumerable<ColumnConfiguration> Columns => mColumns.Values;
+
+        internal IEnumerable<ColumnConfiguration> NonIgnoredColumns => mColumns.Values.Where(c => !c.Ignore);
 
         internal WorksheetConfiguration(IStylesheetProvider stylesheetProvider)
             : this(null, null, null, stylesheetProvider)

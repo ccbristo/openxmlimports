@@ -13,6 +13,7 @@ namespace OpenXmlImports.Core
         public bool Required { get; set; }
         public int MaxLength { get; set; }
         public IType Type { get; set; }
+        public bool Ignore { get; set; }
 
         public ColumnConfiguration()
         {

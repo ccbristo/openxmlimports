@@ -36,6 +36,12 @@ namespace OpenXmlImports
             return this;
         }
 
+        protected ColumnBuilder Ignore(bool ignore)
+        {
+            Configuration.Ignore = true;
+            return this;
+        }
+
         public ColumnBuilder Required(bool required)
         {
             Configuration.Required = required;
@@ -106,33 +112,61 @@ namespace OpenXmlImports
             return this;
         }
 
+        public new ColumnBuilder<TColumn> Ignore(bool ignore = true)
+        {
+            base.Ignore(ignore);
+            return this;
+        }
+
         // TODO [ccb] Implement these features.
+
         //public ColumnBuilder<TColumn> OneOf(IEnumerable<TColumn> options)
+
         //{
+
         //    return OneOf(options, EqualityComparer<TColumn>.Default)
+
         //}
+
 
         //// TODO [ccb] Bring back FuncEqualityComparer<TColumn, TOption>
+
         //public ColumnBuilder<TColumn> OneOf<TOption>(IEnumerable<TOption> options, Func<TColumn, TOption, bool> comparison)
+
         //{
+
         //    this.options = options;
+
         //    return this;
+
         //}
+
 
         //public ColumnBuilder<TColumn> OneOf(IEnumerable<TColumn> options, IEqualityComparer<TColumn> comparer)
+
         //{
 
+
         //}
+
 
         //public ColumnBuilder<TColumn> ListValidValuesOnError()
+
         //{
+
         //    return ListValidValuesOnError(true);
+
         //}
 
+
         //public ColumnBuilder<TColumn> ListValidValuesOnError(bool listValidOptions)
+
         //{
+
         //    Configuration.ListValidValuesOnError = listValidOptions;
+
         //    return this;
+
         //}
     }
 }

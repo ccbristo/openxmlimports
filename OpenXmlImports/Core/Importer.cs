@@ -72,8 +72,8 @@ namespace OpenXmlImports.Core
             var map = new Dictionary<ColumnConfiguration, ColumnReference>();
 
             // only pay attention to columns configured in.
-            // ignore any extra columns in the sheet.
-            foreach (var column in worksheetConfig.Columns)
+            // ignore any extra columns in the sheet and columns explicitly ignored.
+            foreach (var column in worksheetConfig.NonIgnoredColumns)
             {
                 var cells = headerRow.Elements<Cell>().Where(c => c.GetCellText(sharedStrings) == column.Name)
                     .ToList();
@@ -110,8 +110,8 @@ namespace OpenXmlImports.Core
             SharedStringTable sharedStrings, IErrorPolicy errorPolicy, Row row)
         {
             // only pay attention to columns configured in.
-            // ignore any extra columns in the sheet.
-            foreach (var column in worksheetConfig.Columns)
+            // ignore any extra columns in the sheet and any explicitly ignored columns.
+            foreach (var column in worksheetConfig.NonIgnoredColumns)
             {
                 var colRef = columnMap[column];
                 var cell = row.Elements<Cell>().SingleOrDefault(c => c.CellReference.Column() == colRef);

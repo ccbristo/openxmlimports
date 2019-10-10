@@ -175,6 +175,7 @@
     <Compile Include="RootPropertiesHierarchy.cs" />
     <Compile Include="SimpleHierarchy.cs" />
     <Compile Include="SingleTableHierarchy.cs" />
+    <Compile Include="TypeFactoryTests.cs" />
     <Compile Include="WorkbookConfigurationTests.cs" />
   </ItemGroup>
   <ItemGroup>

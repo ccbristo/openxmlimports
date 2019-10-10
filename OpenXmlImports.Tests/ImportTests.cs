@@ -186,6 +186,26 @@ namespace OpenXmlImports.Tests
         }
 
         [TestMethod]
+        public void Missing_Column_Is_Ignored()
+        {
+            var config = new WorkbookConfiguration<SingleTableHierarchy>(new DefaultStylesheetProvider());
+            var singleTableItemSheet = new WorksheetConfiguration(typeof(SingleTableItem), "Single Table", "SingleTableItems", config.StylesheetProvider);
+            singleTableItemSheet.SheetName = "Item 1s";
+
+            var iConfiguration = singleTableItemSheet.AddColumn("I", SingleTableHierarchyIMember);
+            iConfiguration.Ignore = true;
+
+            var dateColumn = singleTableItemSheet.AddColumn("A Date", SingleTableHierarchyADateMember);
+            dateColumn.CellFormat = config.StylesheetProvider.DateFormat;
+            singleTableItemSheet.AddColumn("String Field", SingleTableHierarchyStringFieldMember);
+            config.AddWorksheet(singleTableItemSheet);
+
+            SingleTableHierarchy result;
+            using (var input = Assembly.GetExecutingAssembly().GetManifestResourceStream("OpenXmlImports.Tests.TestFiles.Missing_Column.xlsx"))
+                result = config.Import(input);
+        }
+
+        [TestMethod]
         public void Duplicated_Sheets()
         {
             // excel prevents this

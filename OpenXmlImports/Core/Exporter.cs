@@ -28,7 +28,7 @@ namespace OpenXmlImports.Core
                 SheetData sheetData;
                 var sheet = AddSheet(workbookPart, sheetId, worksheetConfig.SheetName, out sheetData);
 
-                var headerRow = CreateHeaderRow(worksheetConfig, sheetData);
+                var headerRow = CreateHeaderRow(worksheetConfig);
                 sheetData.Append(headerRow);
 
                 object source = workbookConfig.GetMemberFor(worksheetConfig, workbookSource);
@@ -48,12 +48,12 @@ namespace OpenXmlImports.Core
             document.Close();
         }
 
-        private Row CreateHeaderRow(WorksheetConfiguration worksheetConfig, SheetData sheetData)
+        private Row CreateHeaderRow(WorksheetConfiguration worksheetConfig)
         {
             var row = new Row();
 
             ColumnReference colRef = "A";
-            foreach (var column in worksheetConfig)
+            foreach (var column in worksheetConfig.NonIgnoredColumns)
             {
                 Cell cell = new Cell()
                 {
@@ -84,7 +84,7 @@ namespace OpenXmlImports.Core
             Row row = new Row();
             ColumnReference colRef = "A";
 
-            foreach (var column in worksheetConfig)
+            foreach (var column in worksheetConfig.NonIgnoredColumns)
             {
                 object value = column.GetValue(source);
 

@@ -33,5 +33,16 @@ namespace OpenXmlImports.Tests
 
             Assert.AreSame(stylesheetProvider.DateFormat, column.Configuration.CellFormat, "Wrong cell format applied for DateTime?.");
         }
+
+        [TestMethod]
+        public void CanIgnoreColumns()
+        {
+            Expression<Func<X, DateTime?>> nullableDateExp = x => x.NullableDate;
+            var stylesheetProvider = new DefaultStylesheetProvider();
+            var column = new ColumnBuilder<DateTime>("A Date", nullableDateExp.GetMemberInfo(), stylesheetProvider);
+            column.Ignore();
+
+            Assert.IsTrue(column.Configuration.Ignore);
+        }
     }
 }

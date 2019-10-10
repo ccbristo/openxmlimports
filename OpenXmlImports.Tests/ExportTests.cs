@@ -316,6 +316,51 @@ namespace OpenXmlImports.Tests
                 config.Export(source, ms);
         }
 
+        [TestMethod]
+        public void Does_Not_Export_Ignored_Columns()
+        {
+            var config = new WorkbookConfiguration<SingleTableHierarchy>(new DefaultStylesheetProvider());
+
+            DateTime christmas2012 = new DateTime(2012, 12, 25, 11, 59, 30);
+            DateTime newYears2012 = new DateTime(2013, 1, 1);
+
+            var item1 = new SingleTableItem() { I = 0, ADate = christmas2012, StringField = "String 0" };
+            
+            var dataSource = new SingleTableHierarchy()
+            {
+                SingleTableItems = new List<SingleTableItem>() { item1 }
+            };
+
+            var singleTableItemSheet = new WorksheetConfiguration(typeof(SingleTableItem), "Single Table", "SingleTableItems", config.StylesheetProvider);
+            singleTableItemSheet.SheetName = "Item 1s";
+
+            var iColumnConfiguration = singleTableItemSheet.AddColumn("I", SingleTableHierarchyMembers.I);
+            iColumnConfiguration.Ignore = true;
+
+            var dateColumn = singleTableItemSheet.AddColumn("A Date", SingleTableHierarchyMembers.ADate);
+            dateColumn.CellFormat = config.StylesheetProvider.DateFormat;
+            singleTableItemSheet.AddColumn("String Field", SingleTableHierarchyMembers.StringField);
+            config.AddWorksheet(singleTableItemSheet);
+
+            using (var output = new MemoryStream())
+            {
+                config.Export(dataSource, output);
+                var document = SpreadsheetDocument.Open(output, false);
+                var sheetData = document.WorkbookPart.WorksheetParts.First().Worksheet.GetFirstChild<SheetData>();
+
+                Assert.IsNotNull(sheetData);
+
+                var rows = sheetData.Elements<Row>().ToList();
+                Assert.AreEqual(2, rows.Count);
+
+                var headerRow = rows[0];
+                Assert.AreEqual(2, headerRow.Elements<Cell>().Count());
+
+                var dataRow = rows[1];
+                Assert.AreEqual(2, dataRow.Elements<Cell>().Count());
+            }
+        }
+
         private static void SaveToFile(MemoryStream ms, string name)
         {
             using (var fs = File.OpenWrite(name))
