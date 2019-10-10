@@ -8,11 +8,7 @@ namespace OpenXmlImports
 {
     public class ColumnBuilder
     {
-        // TODO [ccb] I would prefer this weren't publicly exposed. Currently only used by tests.
-        // I considered adding a .Format() method to this class to satisfy the test method,
-        // but that doesn't seem to fit well with the other Builder APIs since they do not
-        // and in most cases cannot do this (e.g., Required() already exists, and sets Required = true)
-        public ColumnConfiguration Configuration { get; private set; }
+        internal ColumnConfiguration Configuration { get; }
 
         internal ColumnBuilder()
         {
@@ -45,6 +41,12 @@ namespace OpenXmlImports
         public ColumnBuilder Required(bool required)
         {
             Configuration.Required = required;
+            return this;
+        }
+
+        public ColumnBuilder Type(IType type)
+        {
+            Configuration.Type = type;
             return this;
         }
 
@@ -115,6 +117,12 @@ namespace OpenXmlImports
         public new ColumnBuilder<TColumn> Ignore(bool ignore = true)
         {
             base.Ignore(ignore);
+            return this;
+        }
+
+        public new ColumnBuilder<TColumn> Type(IType type)
+        {
+            base.Type(type);
             return this;
         }
 
