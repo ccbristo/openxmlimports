@@ -6,6 +6,9 @@ namespace OpenXmlImports.Types
     {
         public static IType GetType(Type type)
         {
+            if (type.Is<bool>())
+                return new BooleanType();
+
             if (type.Is<int>())
                 return new IntType();
 
