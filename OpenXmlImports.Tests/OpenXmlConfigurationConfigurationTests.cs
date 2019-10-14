@@ -208,6 +208,24 @@ namespace OpenXmlImports.Tests
             Assert.IsNotNull(jCol);
         }
 
+        [TestMethod]
+        public void Can_Inherit_Columns()
+        {
+            var config = OpenXmlConfiguration.Workbook<InheritanceHierarchy>()
+                .Create();
+
+            Assert.AreEqual(1, config.Worksheets.Count(), "number of worksheet configs");
+
+            var derivedClassConfig = config.Worksheets.Single(wsc => wsc.BoundType == typeof(DerivedClass));
+            Assert.AreEqual(2, derivedClassConfig.Columns.Count());
+
+            var baseClassColumn = derivedClassConfig.Columns.Single(c => c.Member.Name == "OnBaseClass");
+            Assert.IsNotNull(baseClassColumn);
+
+            var onDerivedClassColumn = derivedClassConfig.Columns.Single(c => c.Member.Name == "OnDerivedClass");
+            Assert.IsNotNull(onDerivedClassColumn);
+        }
+
         //[TestMethod]
         public void Test1()
         {

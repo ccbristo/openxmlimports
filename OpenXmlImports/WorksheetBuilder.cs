@@ -95,7 +95,6 @@ namespace OpenXmlImports
             Action<ColumnBuilder<TColumn>> action)
         {
             var member = columnExp.GetMemberInfo();
-            var columnConfig = Configuration.GetColumn(member);
 
             string columnName = ColumnNamingConvention.GetName(member);
             var columnBuilder = new ColumnBuilder<TColumn>(columnName, member, Configuration.StylesheetProvider);
