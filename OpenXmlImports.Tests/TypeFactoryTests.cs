@@ -74,6 +74,12 @@ namespace OpenXmlImports.Tests
         {
             Verify<ulong, ULongType>();
         }
+        
+        [TestMethod]
+        public void CanGetTypeForLong()
+        {
+            Verify<long, LongType>();
+        }
 
         [TestMethod]
         public void CanGetTypeForChar()

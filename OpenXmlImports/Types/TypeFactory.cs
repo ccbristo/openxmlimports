@@ -39,6 +39,9 @@ namespace OpenXmlImports.Types
             if (type.Is<uint>())
                 return new UIntType();
 
+            if (type.Is<long>())
+                return new LongType();
+            
             if (type.Is<ulong>())
                 return new ULongType();
 
