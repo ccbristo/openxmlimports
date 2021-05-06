@@ -11,6 +11,9 @@ namespace OpenXmlImports.Core
 
         public static string GetCellText(this Cell cell, SharedStringTable sharedStrings)
         {
+            if (cell.DataType == null)
+                return string.Empty;
+            
             return (string)StringType.NullSafeGet(cell.CellValue, cell.DataType, sharedStrings);
         }
 
