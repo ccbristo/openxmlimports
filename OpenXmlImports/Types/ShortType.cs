@@ -1,4 +1,5 @@
 ﻿using DocumentFormat.OpenXml.Spreadsheet;
+using OpenXmlImports.Core;
 
 namespace OpenXmlImports.Types
 {
@@ -19,7 +20,11 @@ namespace OpenXmlImports.Types
             if (cellValue == null || string.IsNullOrWhiteSpace(cellValue.Text))
                 return null;
 
-            return short.Parse(cellValue.Text);
+            string text = cellValue.Text;
+            if (cellType == CellValues.SharedString)
+                text = sharedStrings.GetText(cellValue);
+
+            return short.Parse(text.TrimStart('\''));
         }
 
         public void NullSafeSet(CellValue cellValue, object value, SharedStringTable sharedStrings)

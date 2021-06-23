@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using DocumentFormat.OpenXml.Spreadsheet;
+using OpenXmlImports.Core;
 
 namespace OpenXmlImports.Types
 {
@@ -19,13 +20,7 @@ namespace OpenXmlImports.Types
         public object NullSafeGet(CellValue cellValue, CellValues? cellType, SharedStringTable sharedStrings)
         {
             if (cellType == CellValues.SharedString)
-            {
-                // TODO [ccb] Shared strings may also be "runs" to allow for 
-                // formatting to be applied within a cell. Need to figure out how to support that.
-                int index = int.Parse(cellValue.Text);
-                var sharedStringItem = (SharedStringItem)sharedStrings.ElementAt(index);
-                return sharedStringItem.Text.Text;
-            }
+                return sharedStrings.GetText(cellValue);
 
             return cellValue == null ? string.Empty : cellValue.Text;
         }

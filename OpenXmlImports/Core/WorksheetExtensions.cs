@@ -22,5 +22,14 @@ namespace OpenXmlImports.Core
         {
             return stringValue.Value.TrimEnd(numbers);
         }
+
+        internal static string GetText(this SharedStringTable sharedStrings, CellValue cellValue)
+        {
+            // TODO [ccb] Shared strings may also be "runs" to allow for 
+            // formatting to be applied within a cell. Need to figure out how to support that.
+            int index = int.Parse(cellValue.Text);
+            var sharedStringItem = (SharedStringItem)sharedStrings.ElementAt(index);
+            return sharedStringItem.Text.Text;
+        }
     }
 }
