@@ -127,7 +127,14 @@ namespace OpenXmlImports.Core
                 {
                     CellValues? dataType = cell.DataType != null ? cell.DataType.Value : (CellValues?)null;
 
-                    object value = column.Type.NullSafeGet(cell.CellValue, dataType, sharedStrings);
+                    string text = cell.CellValue?.Text;
+                    if (dataType == CellValues.SharedString)
+                        text = sharedStrings.GetText(cell.CellValue);
+
+                    if (text.StartsWith("'"))
+                        text = text.Substring(1);
+
+                    object value = column.Type.NullSafeGet(text);
 
                     if (column.Member.GetMemberType().Is<string>() &&
                         ((string)value ?? string.Empty).Length > column.MaxLength)

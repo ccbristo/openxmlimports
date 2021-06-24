@@ -6,7 +6,7 @@ namespace OpenXmlImports.Types
     {
         string FriendlyName { get; }
         CellValues DataType { get; }
-        object NullSafeGet(CellValue cellValue, CellValues? cellType, SharedStringTable sharedStrings);
+        object NullSafeGet(string text);
         void NullSafeSet(CellValue cellValue, object value, SharedStringTable sharedStrings);
     }
 }

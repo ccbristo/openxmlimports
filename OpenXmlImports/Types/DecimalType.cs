@@ -15,16 +15,12 @@ namespace OpenXmlImports.Types
             get { return CellValues.Number; }
         }
 
-        public object NullSafeGet(CellValue cellValue, CellValues? cellType, SharedStringTable sharedStrings)
+        public object NullSafeGet(string text)
         {
-            if (cellValue == null || string.IsNullOrWhiteSpace(cellValue.Text))
+            if (string.IsNullOrWhiteSpace(text))
                 return null;
 
-            string text = cellValue.Text;
-            if (cellType == CellValues.SharedString)
-                text = sharedStrings.GetText(cellValue);
-
-            return decimal.Parse(text.TrimStart('\''));
+            return decimal.Parse(text);
         }
 
         public void NullSafeSet(CellValue cellValue, object value, SharedStringTable sharedStrings)

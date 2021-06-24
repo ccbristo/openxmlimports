@@ -32,10 +32,9 @@ namespace OpenXmlImports.Types
 
         public CellValues DataType => StringType.DataType;
 
-        public object NullSafeGet(CellValue cellValue, CellValues? cellType, SharedStringTable sharedStrings)
+        public object NullSafeGet(string text)
         {
-            string s = (string)StringType.NullSafeGet(cellValue, cellType, sharedStrings);
-            return Parse(s);
+            return Parse(text);
         }
 
         public void NullSafeSet(CellValue cellValue, object value, SharedStringTable sharedStrings)

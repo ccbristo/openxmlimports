@@ -13,8 +13,11 @@ namespace OpenXmlImports.Core
         {
             if (cell.DataType == null)
                 return string.Empty;
-            
-            return (string)StringType.NullSafeGet(cell.CellValue, cell.DataType, sharedStrings);
+
+            if (cell.DataType?.Value == CellValues.SharedString)
+                return sharedStrings.GetText(cell.CellValue);
+
+            return cell.CellValue.Text;
         }
 
         static readonly char[] numbers = Enumerable.Range('0', 10).Select(i => (char)i).ToArray();

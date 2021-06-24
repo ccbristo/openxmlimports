@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using DocumentFormat.OpenXml.Spreadsheet;
-using OpenXmlImports.Core;
 
 namespace OpenXmlImports.Types
 {
@@ -17,12 +16,9 @@ namespace OpenXmlImports.Types
             get { return CellValues.SharedString; }
         }
 
-        public object NullSafeGet(CellValue cellValue, CellValues? cellType, SharedStringTable sharedStrings)
+        public object NullSafeGet(string text)
         {
-            if (cellType == CellValues.SharedString)
-                return sharedStrings.GetText(cellValue);
-
-            return cellValue == null ? string.Empty : cellValue.Text;
+            return text;
         }
 
         public void NullSafeSet(CellValue cellValue, object value, SharedStringTable sharedStrings)
