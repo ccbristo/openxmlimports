@@ -8,9 +8,9 @@ namespace OpenXmlImports.Core
     public class WorkbookConfiguration<TWorkbook>
     {
         public string Name { get; set; }
-        public Type BoundType { get; private set; }
+        public Type BoundType { get; }
         public IErrorPolicy ErrorPolicy { get; set; }
-        public IStylesheetProvider StylesheetProvider { get; private set; }
+        public IStylesheetProvider StylesheetProvider { get; }
         private readonly Dictionary<object, WorksheetConfiguration> mWorksheets = new Dictionary<object, WorksheetConfiguration>();
 
         public WorkbookConfiguration(IStylesheetProvider stylesheetProvider)
@@ -27,15 +27,7 @@ namespace OpenXmlImports.Core
 
         public WorksheetConfiguration GetWorksheet(string name)
         {
-            WorksheetConfiguration config;
-            mWorksheets.TryGetValue(name, out config);
-            return config;
-        }
-
-        public WorksheetConfiguration GetWorksheet(MemberInfo member)
-        {
-            WorksheetConfiguration config;
-            mWorksheets.TryGetValue(member, out config);
+            mWorksheets.TryGetValue(name, out var config);
             return config;
         }
 
@@ -47,8 +39,8 @@ namespace OpenXmlImports.Core
             var memberInfos = BoundType.GetMember(worksheet.MemberName, BindingFlags.Public | BindingFlags.Instance);
 
             if (memberInfos.Length == 0)
-                throw new MissingMemberException(string.Format("Could not find a public instance member named {0} on {1}",
-                    worksheet.MemberName, BoundType.Name));
+                throw new MissingMemberException(
+                    $"Could not find a public instance member named {worksheet.MemberName} on {BoundType.Name}");
             else if (memberInfos.Length > 1)
                 // TODO [ccb] Verify this is the type of exception to throw and add a meaningful message.
                 throw new AmbiguousMatchException();
@@ -78,10 +70,7 @@ namespace OpenXmlImports.Core
             return importer.Import(this, input);
         }
 
-        public IEnumerable<WorksheetConfiguration> Worksheets
-        {
-            get { return mWorksheets.Values; }
-        }
+        public IEnumerable<WorksheetConfiguration> Worksheets => mWorksheets.Values;
 
         public IEnumerator<WorksheetConfiguration> GetEnumerator()
         {

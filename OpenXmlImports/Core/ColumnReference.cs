@@ -11,17 +11,14 @@ namespace OpenXmlImports.Core
         public static readonly ColumnReference MaxValue = new ColumnReference(16384); // column XFD
 
         readonly int mValue;
-        public int Value
-        {
-            get { return mValue; }
-        }
+        public int Value => mValue;
 
         public ColumnReference(string column)
         {
             mValue = Parse(column);
 
             if (mValue < MinValue.Value || mValue > MaxValue.Value)
-                throw new ArgumentOutOfRangeException("column");
+                throw new ArgumentOutOfRangeException(nameof(column));
         }
 
         private ColumnReference(int column)
@@ -104,16 +101,13 @@ namespace OpenXmlImports.Core
 
         public override bool Equals(object obj)
         {
-            if (!(obj is ColumnReference))
+            if (!(obj is ColumnReference r))
                 return false;
 
-            return ((ColumnReference)obj).Value == this.Value;
+            return r.Value == this.Value;
         }
 
-        public override int GetHashCode()
-        {
-            return Value;
-        }
+        public override int GetHashCode() => Value;
 
         public override string ToString()
         {

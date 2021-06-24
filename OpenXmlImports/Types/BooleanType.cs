@@ -4,15 +4,9 @@ namespace OpenXmlImports.Types
 {
     public class BooleanType : IType
     {
-        public string FriendlyName
-        {
-            get { return "boolean"; }
-        }
+        public string FriendlyName => "boolean";
 
-        public CellValues DataType
-        {
-            get { return CellValues.String; }
-        }
+        public CellValues DataType => CellValues.String;
 
         public object NullSafeGet(string text)
         {

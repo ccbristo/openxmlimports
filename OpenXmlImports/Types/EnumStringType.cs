@@ -8,7 +8,7 @@ namespace OpenXmlImports.Types
 {
     public class EnumStringType : IType
     {
-        public Type EnumType { get; private set; }
+        private readonly Type EnumType;
         private readonly StringType StringType = new StringType();
 
         private static readonly MethodInfo EnumTryParseGenericMethodInfo;
@@ -28,7 +28,7 @@ namespace OpenXmlImports.Types
             this.FriendlyName = new CamelCaseNamingConvention().GetName(EnumType);
         }
 
-        public string FriendlyName { get; private set; }
+        public string FriendlyName { get; }
 
         public CellValues DataType => StringType.DataType;
 

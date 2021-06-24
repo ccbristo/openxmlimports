@@ -4,15 +4,9 @@ namespace OpenXmlImports.Types
 {
     public class ByteType : IType
     {
-        public string FriendlyName
-        {
-            get { return "whole number"; }
-        }
+        public string FriendlyName => "whole number";
 
-        public CellValues DataType
-        {
-            get { return CellValues.Number; }
-        }
+        public CellValues DataType => CellValues.Number;
 
         public object NullSafeGet(string text)
         {

@@ -57,8 +57,8 @@ namespace OpenXmlImports.Types
             if (type.Is<Guid>())
                 return new GuidType();
 
-            throw new ArgumentOutOfRangeException("type",
-                string.Format("Could not determine type for {0}", type.Name));
+            throw new ArgumentOutOfRangeException(nameof(type),
+                $"Could not determine type for {type.Name}");
         }
     }
 }

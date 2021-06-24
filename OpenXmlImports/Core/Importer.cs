@@ -125,7 +125,7 @@ namespace OpenXmlImports.Core
                 }
                 else if (cellHasValue)
                 {
-                    CellValues? dataType = cell.DataType != null ? cell.DataType.Value : (CellValues?)null;
+                    CellValues? dataType = cell.DataType?.Value;
 
                     string text = cell.CellValue?.Text;
                     if (dataType == CellValues.SharedString)
@@ -174,9 +174,8 @@ namespace OpenXmlImports.Core
                 Type.DefaultBinder, Type.EmptyTypes, null);
 
             if (ctor == null)
-                throw new InvalidOperationException(string.Format(
-                    "The requested type {0} does not have a zero-argument constructor.",
-                    type.FullName));
+                throw new InvalidOperationException(
+                    $"The requested type {type.FullName} does not have a zero-argument constructor.");
 
             return ctor.Invoke(new object[] { });
         }

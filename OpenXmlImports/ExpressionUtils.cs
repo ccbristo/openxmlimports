@@ -9,8 +9,8 @@ namespace OpenXmlImports
         public static MemberInfo GetMemberInfo(this Expression exp)
         {
             // TODO [ccb] This needs better validation;
-            var lamdaExp = ((LambdaExpression)exp);
-            var memberExp = (MemberExpression)lamdaExp.Body;
+            var lambdaExp = (LambdaExpression)exp;
+            var memberExp = (MemberExpression)lambdaExp.Body;
 
             // this would seem like the obvious thing to do, but
             // it doesn't play well with inheritance hierarchies

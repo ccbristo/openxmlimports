@@ -12,7 +12,7 @@ namespace OpenXmlImports
     {
         private readonly WorkbookConfiguration<TWorkbook> mConfiguration;
         private readonly Dictionary<object, WorksheetBuilder> worksheets = new Dictionary<object, WorksheetBuilder>();
-        private INamingConvention WorksheetNamingConvention;
+        private readonly INamingConvention WorksheetNamingConvention;
 
         public WorkbookBuilder(TStylesheet stylesheet)
         {
@@ -25,7 +25,8 @@ namespace OpenXmlImports
             var bindingFlags = BindingFlags.Public | BindingFlags.Instance;
 
             var rootProperties = typeof(TWorkbook).GetMembers(bindingFlags)
-                .Where(m => m.IsPropertyOrField() && m.GetMemberType().IsTerminal());
+                .Where(m => m.IsPropertyOrField() && m.GetMemberType().IsTerminal())
+                .ToList();
 
             if (rootProperties.Any())
             {
@@ -66,9 +67,7 @@ namespace OpenXmlImports
 
         private WorksheetBuilder GetNamedWorksheet(string name)
         {
-            WorksheetBuilder worksheetConfig;
-
-            if (!worksheets.TryGetValue(name, out worksheetConfig))
+            if (!worksheets.TryGetValue(name, out var worksheetConfig))
             {
                 worksheetConfig = new WorksheetBuilder(mConfiguration.StylesheetProvider);
                 worksheets[name] = worksheetConfig;
@@ -111,9 +110,7 @@ namespace OpenXmlImports
 
         private WorksheetBuilder<TWorkbook> GetRootWorksheetBuilder()
         {
-            WorksheetBuilder worksheetBuilder;
-
-            if (worksheets.TryGetValue(typeof(TWorkbook), out worksheetBuilder))
+            if (worksheets.TryGetValue(typeof(TWorkbook), out var worksheetBuilder))
                 return (WorksheetBuilder<TWorkbook>)worksheetBuilder;
 
             var result = new WorksheetBuilder<TWorkbook>("Details", mConfiguration.StylesheetProvider);

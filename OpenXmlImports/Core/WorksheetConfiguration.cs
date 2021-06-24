@@ -10,7 +10,7 @@ namespace OpenXmlImports.Core
     public class WorksheetConfiguration
     {
         private readonly Dictionary<MemberInfo, ColumnConfiguration> mColumns = new Dictionary<MemberInfo, ColumnConfiguration>();
-        internal IStylesheetProvider StylesheetProvider { get; set; }
+        internal IStylesheetProvider StylesheetProvider { get; }
 
         public IEnumerable<ColumnConfiguration> Columns => mColumns.Values;
 
@@ -18,10 +18,6 @@ namespace OpenXmlImports.Core
 
         internal WorksheetConfiguration(IStylesheetProvider stylesheetProvider)
             : this(null, null, null, stylesheetProvider)
-        { }
-
-        internal WorksheetConfiguration(Type boundType, IStylesheetProvider stylesheetProvider)
-            : this(boundType, null, null, stylesheetProvider)
         { }
 
         public WorksheetConfiguration(Type boundType, string sheetName, string memberName,
@@ -33,8 +29,8 @@ namespace OpenXmlImports.Core
             this.StylesheetProvider = stylesheetProvider;
         }
 
-        public Type BoundType { get; set; }
-        public string MemberName { get; set; }
+        public Type BoundType { get; }
+        public string MemberName { get; }
         public string SheetName { get; set; }
         public bool ExportOnly { get; set; }
 

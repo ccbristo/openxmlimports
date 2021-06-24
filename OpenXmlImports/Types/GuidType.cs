@@ -5,15 +5,9 @@ namespace OpenXmlImports.Types
 {
     public class GuidType : IType
     {
-        public string FriendlyName
-        {
-            get { return "guid"; }
-        }
+        public string FriendlyName => "guid";
 
-        public CellValues DataType
-        {
-            get { return CellValues.String; }
-        }
+        public CellValues DataType => CellValues.String;
 
         public object NullSafeGet(string text)
         {

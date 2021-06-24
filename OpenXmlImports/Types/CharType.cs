@@ -4,15 +4,9 @@ namespace OpenXmlImports.Types
 {
     public class CharType : IType
     {
-        public string FriendlyName
-        {
-            get { return "character"; }
-        }
+        public string FriendlyName => "character";
 
-        public CellValues DataType
-        {
-            get { return CellValues.String; }
-        }
+        public CellValues DataType => CellValues.String;
 
         public object NullSafeGet(string text)
         {

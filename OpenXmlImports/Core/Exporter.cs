@@ -19,14 +19,13 @@ namespace OpenXmlImports.Core
             var stylesPart = workbookPart.AddNewPart<WorkbookStylesPart>();
             stylesPart.Stylesheet = (Stylesheet)workbookConfig.StylesheetProvider.Stylesheet.CloneNode(true);
 
-            var sheets = document.WorkbookPart.Workbook.AppendChild<Sheets>(new Sheets());
+            var sheets = document.WorkbookPart.Workbook.AppendChild(new Sheets());
 
             uint sheetId = 1;
 
             foreach (var worksheetConfig in workbookConfig)
             {
-                SheetData sheetData;
-                var sheet = AddSheet(workbookPart, sheetId, worksheetConfig.SheetName, out sheetData);
+                var sheet = AddSheet(workbookPart, sheetId, worksheetConfig.SheetName, out var sheetData);
 
                 var headerRow = CreateHeaderRow(worksheetConfig);
                 sheetData.Append(headerRow);

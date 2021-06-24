@@ -14,8 +14,7 @@ namespace OpenXmlImports
                 .ToList();
 
             if (closers.Count == 0)
-                throw new ArgumentException(string.Format("{0} does not close {1}.",
-                    type.Name, openInterface.Name));
+                throw new ArgumentException($"{type.Name} does not close {openInterface.Name}.");
 
             return closers[0];
         }
@@ -58,8 +57,8 @@ namespace OpenXmlImports
             if ((type = memberInfo as Type) != null)
                 return type;
 
-            throw new InvalidOperationException(string.Format("{0}.{1} is not a property or field.",
-                memberInfo.DeclaringType.Name, memberInfo.Name));
+            throw new InvalidOperationException(
+                $"{memberInfo.DeclaringType.Name}.{memberInfo.Name} is not a property or field.");
         }
 
         public static bool Is<T>(this Type type)
@@ -79,8 +78,8 @@ namespace OpenXmlImports
             if ((fieldInfo = memberInfo as FieldInfo) != null)
                 return fieldInfo.GetValue(source);
 
-            throw new InvalidOperationException(string.Format("{0}.{1} is not a property or field.",
-                memberInfo.DeclaringType.Name, memberInfo.Name));
+            throw new InvalidOperationException(
+                $"{memberInfo.DeclaringType.Name}.{memberInfo.Name} is not a property or field.");
         }
 
         public static void SetPropertyOrFieldValue(this MemberInfo member, object instance, object value)
@@ -93,8 +92,8 @@ namespace OpenXmlImports
             else if ((propertyInfo = member as PropertyInfo) != null)
                 propertyInfo.SetValue(instance, value, null);
             else
-                throw new InvalidOperationException(string.Format("{0}.{1} is not a property or field.",
-                    member.DeclaringType.Name, member.Name));
+                throw new InvalidOperationException(
+                    $"{member.DeclaringType.Name}.{member.Name} is not a property or field.");
         }
 
         public static bool IsNullable(this Type type)

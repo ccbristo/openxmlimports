@@ -6,15 +6,9 @@ namespace OpenXmlImports.Types
 {
     public class StringType : IType
     {
-        public string FriendlyName
-        {
-            get { return "text block"; }
-        }
+        public string FriendlyName => "text block";
 
-        public CellValues DataType
-        {
-            get { return CellValues.SharedString; }
-        }
+        public CellValues DataType => CellValues.SharedString;
 
         public object NullSafeGet(string text)
         {

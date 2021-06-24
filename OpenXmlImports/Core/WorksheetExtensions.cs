@@ -1,14 +1,11 @@
 ﻿using System.Linq;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Spreadsheet;
-using OpenXmlImports.Types;
 
 namespace OpenXmlImports.Core
 {
     public static class WorksheetExtensions
     {
-        static readonly StringType StringType = new StringType();
-
         public static string GetCellText(this Cell cell, SharedStringTable sharedStrings)
         {
             if (cell.DataType == null)
@@ -20,10 +17,11 @@ namespace OpenXmlImports.Core
             return cell.CellValue.Text;
         }
 
-        static readonly char[] numbers = Enumerable.Range('0', 10).Select(i => (char)i).ToArray();
+        private static readonly char[] Numbers = Enumerable.Range('0', 10).Select(i => (char)i).ToArray();
         public static ColumnReference Column(this StringValue stringValue)
         {
-            return stringValue.Value.TrimEnd(numbers);
+            var columnOnly = stringValue.Value.TrimEnd(Numbers);
+            return new ColumnReference(columnOnly);
         }
 
         internal static string GetText(this SharedStringTable sharedStrings, CellValue cellValue)

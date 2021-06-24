@@ -4,15 +4,9 @@ namespace OpenXmlImports.Types
 {
     public class DoubleType : IType
     {
-        public string FriendlyName
-        {
-            get { return "number"; }
-        }
+        public string FriendlyName => "number";
 
-        public CellValues DataType
-        {
-            get { return CellValues.Number; }
-        }
+        public CellValues DataType => CellValues.Number;
 
         public object NullSafeGet(string text)
         {

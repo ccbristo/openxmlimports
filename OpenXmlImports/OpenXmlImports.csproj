@@ -191,7 +191,6 @@
     <Compile Include="ColumnBuilder.cs" />
     <Compile Include="Core\AggregatingExceptionErrorPolicy.cs" />
     <Compile Include="Core\CamelCaseFormatter.cs" />
-    <Compile Include="Core\CellBinder.cs" />
     <Compile Include="Core\ColumnConfiguration.cs" />
     <Compile Include="Core\ColumnReference.cs" />
     <Compile Include="Core\DuplicatedColumnException.cs" />

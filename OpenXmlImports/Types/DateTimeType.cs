@@ -5,15 +5,9 @@ namespace OpenXmlImports.Types
 {
     public class DateTimeType : IType
     {
-        public string FriendlyName
-        {
-            get { return "date"; }
-        }
+        public string FriendlyName => "date";
 
-        public CellValues DataType
-        {
-            get { return CellValues.Number; }
-        }
+        public CellValues DataType => CellValues.Number;
 
         public object NullSafeGet(string text)
         {

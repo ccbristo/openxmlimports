@@ -28,7 +28,7 @@ namespace OpenXmlImports.Core
         public object GetValue(object source)
         {
             if (source == null)
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
 
             var value = Member.GetPropertyOrFieldValue(source);
             return value;
